@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2013</Year>
+        <App>I</App>
+        <Taxon>Paphiopedilum hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>TH</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>10</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose></Purpose>
+        <Source>D</Source>
+    </trade>
+    <trade>
+        <Year>2013</Year>
+        <App>I</App>
+        <Taxon>Paphiopedilum hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>TW</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>290</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>A</Source>
+    </trade>
+    <trade>
+        <Year>2013</Year>
+        <App>I</App>
+        <Taxon>Paphiopedilum hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>TW</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>160</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>D</Source>
+    </trade>
+</trades>

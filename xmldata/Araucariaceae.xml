@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2000</Year>
+        <App>II</App>
+        <Taxon>Araucaria araucana</Taxon>
+        <Class></Class>
+        <Order>Pinales</Order>
+        <Family>Araucariaceae</Family>
+        <Genus>Araucaria</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AR</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>5</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit>kg</Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+    <trade>
+        <Year>2003</Year>
+        <App>I</App>
+        <Taxon>Araucaria araucana</Taxon>
+        <Class></Class>
+        <Order>Pinales</Order>
+        <Family>Araucariaceae</Family>
+        <Genus>Araucaria</Genus>
+        <Importer>GB</Importer>
+        <Exporter>CL</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>4</Exporter_reported_quantity>
+        <Term>timber pieces</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+    <trade>
+        <Year>2009</Year>
+        <App>I</App>
+        <Taxon>Araucaria araucana</Taxon>
+        <Class></Class>
+        <Order>Pinales</Order>
+        <Family>Araucariaceae</Family>
+        <Genus>Araucaria</Genus>
+        <Importer>GB</Importer>
+        <Exporter>CL</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>10</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>dried plants</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+    <trade>
+        <Year>2009</Year>
+        <App>I</App>
+        <Taxon>Araucaria araucana</Taxon>
+        <Class></Class>
+        <Order>Pinales</Order>
+        <Family>Araucariaceae</Family>
+        <Genus>Araucaria</Genus>
+        <Importer>GB</Importer>
+        <Exporter>CL</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>3747</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>seeds</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

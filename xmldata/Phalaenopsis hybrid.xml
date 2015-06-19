@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2013</Year>
+        <App>II</App>
+        <Taxon>Phalaenopsis hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>MY</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>3</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>A</Source>
+    </trade>
+</trades>

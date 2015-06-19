@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2008</Year>
+        <App>I</App>
+        <Taxon>Platanista gangetica</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cetacea</Order>
+        <Family>Platanistidae</Family>
+        <Genus>Platanista</Genus>
+        <Importer>GB</Importer>
+        <Exporter>PK</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>10</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>U</Source>
+    </trade>
+    <trade>
+        <Year>2008</Year>
+        <App>I</App>
+        <Taxon>Platanista gangetica</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cetacea</Order>
+        <Family>Platanistidae</Family>
+        <Genus>Platanista</Genus>
+        <Importer>GB</Importer>
+        <Exporter>US</Exporter>
+        <Origin>IN</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>1</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+    <trade>
+        <Year>2008</Year>
+        <App>I</App>
+        <Taxon>Platanista gangetica</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cetacea</Order>
+        <Family>Platanistidae</Family>
+        <Genus>Platanista</Genus>
+        <Importer>GB</Importer>
+        <Exporter>US</Exporter>
+        <Origin>PK</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>2</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

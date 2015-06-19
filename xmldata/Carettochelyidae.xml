@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2005</Year>
+        <App>II</App>
+        <Taxon>Carettochelys insculpta</Taxon>
+        <Class>Reptilia</Class>
+        <Order>Testudines</Order>
+        <Family>Carettochelyidae</Family>
+        <Genus>Carettochelys</Genus>
+        <Importer>GB</Importer>
+        <Exporter>SG</Exporter>
+        <Origin>XX</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>150</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>O</Source>
+    </trade>
+</trades>

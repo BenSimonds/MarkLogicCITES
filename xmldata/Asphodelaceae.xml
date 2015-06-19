@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2013</Year>
+        <App>II</App>
+        <Taxon>Asphodelaceae spp.</Taxon>
+        <Class></Class>
+        <Order>Asparagales</Order>
+        <Family>Asphodelaceae</Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>MG</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>6</Exporter_reported_quantity>
+        <Term>dried plants</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+    <trade>
+        <Year>2013</Year>
+        <App>II</App>
+        <Taxon>Asphodelaceae spp.</Taxon>
+        <Class></Class>
+        <Order>Asparagales</Order>
+        <Family>Asphodelaceae</Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>MG</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>1</Exporter_reported_quantity>
+        <Term>leaves</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

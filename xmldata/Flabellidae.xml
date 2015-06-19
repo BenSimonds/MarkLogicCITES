@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2001</Year>
+        <App>II</App>
+        <Taxon>Flabellum spp.</Taxon>
+        <Class>Anthozoa</Class>
+        <Order>Scleractinia</Order>
+        <Family>Flabellidae</Family>
+        <Genus>Flabellum</Genus>
+        <Importer>GB</Importer>
+        <Exporter>MX</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>1</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>raw corals</Term>
+        <Unit></Unit>
+        <Purpose></Purpose>
+        <Source>I</Source>
+    </trade>
+    <trade>
+        <Year>2003</Year>
+        <App>II</App>
+        <Taxon>Monomyces rubrum</Taxon>
+        <Class>Anthozoa</Class>
+        <Order>Scleractinia</Order>
+        <Family>Flabellidae</Family>
+        <Genus>Monomyces</Genus>
+        <Importer>GB</Importer>
+        <Exporter>US</Exporter>
+        <Origin>AU</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>1</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

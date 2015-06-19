@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2004</Year>
+        <App>II</App>
+        <Taxon>Anthozoa</Taxon>
+        <Class>Anthozoa</Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>ZZ</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>0.2</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>raw corals</Term>
+        <Unit>kg</Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

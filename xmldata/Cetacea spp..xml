@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2013</Year>
+        <App>II</App>
+        <Taxon>Cetacea spp.</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cetacea</Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>US</Exporter>
+        <Origin>XX</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>6</Exporter_reported_quantity>
+        <Term>bone carvings</Term>
+        <Unit></Unit>
+        <Purpose>Q</Purpose>
+        <Source>O</Source>
+    </trade>
+    <trade>
+        <Year>2013</Year>
+        <App>II</App>
+        <Taxon>Cetacea spp.</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cetacea</Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>US</Exporter>
+        <Origin>XX</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>1</Exporter_reported_quantity>
+        <Term>bone pieces</Term>
+        <Unit></Unit>
+        <Purpose>Q</Purpose>
+        <Source>O</Source>
+    </trade>
+</trades>

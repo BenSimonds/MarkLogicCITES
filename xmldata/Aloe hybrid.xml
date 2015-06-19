@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2011</Year>
+        <App>II</App>
+        <Taxon>Aloe hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>ZA</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>2</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>A</Source>
+    </trade>
+</trades>

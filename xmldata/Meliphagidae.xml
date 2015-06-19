@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2009</Year>
+        <App>I</App>
+        <Taxon>Lichenostomus melanops cassidix</Taxon>
+        <Class>Aves</Class>
+        <Order>Passeriformes</Order>
+        <Family>Meliphagidae</Family>
+        <Genus>Lichenostomus</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AU</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>6</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>C</Source>
+    </trade>
+    <trade>
+        <Year>2012</Year>
+        <App>I</App>
+        <Taxon>Lichenostomus melanops cassidix</Taxon>
+        <Class>Aves</Class>
+        <Order>Passeriformes</Order>
+        <Family>Meliphagidae</Family>
+        <Genus>Lichenostomus</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AU</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>17</Exporter_reported_quantity>
+        <Term>eggs</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>C</Source>
+    </trade>
+</trades>

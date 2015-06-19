@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2008</Year>
+        <App>II</App>
+        <Taxon>Nardostachys grandiflora</Taxon>
+        <Class></Class>
+        <Order>Dipsacales</Order>
+        <Family>Valerianaceae</Family>
+        <Genus>Nardostachys</Genus>
+        <Importer>GB</Importer>
+        <Exporter>CN</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>3</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>derivatives</Term>
+        <Unit></Unit>
+        <Purpose></Purpose>
+        <Source>I</Source>
+    </trade>
+    <trade>
+        <Year>2010</Year>
+        <App>II</App>
+        <Taxon>Nardostachys grandiflora</Taxon>
+        <Class></Class>
+        <Order>Dipsacales</Order>
+        <Family>Valerianaceae</Family>
+        <Genus>Nardostachys</Genus>
+        <Importer>GB</Importer>
+        <Exporter>NP</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>49</Exporter_reported_quantity>
+        <Term>oil</Term>
+        <Unit>kg</Unit>
+        <Purpose>T</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

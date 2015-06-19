@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2011</Year>
+        <App>II</App>
+        <Taxon>Epidendrum hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>TW</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>10</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>A</Source>
+    </trade>
+</trades>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2006</Year>
+        <App>II</App>
+        <Taxon>Epipedobates trivittatus</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>CA</Exporter>
+        <Origin>PE</Origin>
+        <Importer_reported_quantity>8</Importer_reported_quantity>
+        <Exporter_reported_quantity>8</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>C</Source>
+    </trade>
+</trades>

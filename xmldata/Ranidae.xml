@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2004</Year>
+        <App>N</App>
+        <Taxon>Lithobates catesbeianus</Taxon>
+        <Class>Amphibia</Class>
+        <Order>Anura</Order>
+        <Family>Ranidae</Family>
+        <Genus>Lithobates</Genus>
+        <Importer>GB</Importer>
+        <Exporter>UY</Exporter>
+        <Origin>CA</Origin>
+        <Importer_reported_quantity>2</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>skins</Term>
+        <Unit>kg</Unit>
+        <Purpose>T</Purpose>
+        <Source>R</Source>
+    </trade>
+    <trade>
+        <Year>2004</Year>
+        <App>N</App>
+        <Taxon>Lithobates catesbeianus</Taxon>
+        <Class>Amphibia</Class>
+        <Order>Anura</Order>
+        <Family>Ranidae</Family>
+        <Genus>Lithobates</Genus>
+        <Importer>GB</Importer>
+        <Exporter>UY</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>4</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>skins</Term>
+        <Unit></Unit>
+        <Purpose></Purpose>
+        <Source>I</Source>
+    </trade>
+    <trade>
+        <Year>2008</Year>
+        <App>N</App>
+        <Taxon>Lithobates catesbeianus</Taxon>
+        <Class>Amphibia</Class>
+        <Order>Anura</Order>
+        <Family>Ranidae</Family>
+        <Genus>Lithobates</Genus>
+        <Importer>GB</Importer>
+        <Exporter>GH</Exporter>
+        <Origin>XX</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>350</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

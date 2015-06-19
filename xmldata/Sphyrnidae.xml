@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2012</Year>
+        <App>III</App>
+        <Taxon>Sphyrna lewini</Taxon>
+        <Class>Elasmobranchii</Class>
+        <Order>Carchariniformes</Order>
+        <Family>Sphyrnidae</Family>
+        <Genus>Sphyrna</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AE</Exporter>
+        <Origin>US</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>1</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>O</Source>
+    </trade>
+</trades>

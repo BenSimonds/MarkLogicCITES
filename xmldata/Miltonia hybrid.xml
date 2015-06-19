@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2010</Year>
+        <App>II</App>
+        <Taxon>Miltonia hybrid</Taxon>
+        <Class></Class>
+        <Order></Order>
+        <Family></Family>
+        <Genus></Genus>
+        <Importer>GB</Importer>
+        <Exporter>JE</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>1000</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>Q</Purpose>
+        <Source>A</Source>
+    </trade>
+</trades>

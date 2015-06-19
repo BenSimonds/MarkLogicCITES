@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2009</Year>
+        <App>II</App>
+        <Taxon>Ratufa macroura</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Rodentia</Order>
+        <Family>Sciuridae</Family>
+        <Genus>Ratufa</Genus>
+        <Importer>GB</Importer>
+        <Exporter>LK</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>4</Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>Z</Purpose>
+        <Source>C</Source>
+    </trade>
+    <trade>
+        <Year>2012</Year>
+        <App>II</App>
+        <Taxon>Ratufa macroura</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Rodentia</Order>
+        <Family>Sciuridae</Family>
+        <Genus>Ratufa</Genus>
+        <Importer>GB</Importer>
+        <Exporter>LK</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>1</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>Z</Purpose>
+        <Source>C</Source>
+    </trade>
+</trades>

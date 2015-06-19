@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2001</Year>
+        <App>I</App>
+        <Taxon>Trichechus manatus</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Sirenia</Order>
+        <Family>Trichechidae</Family>
+        <Genus>Trichechus</Genus>
+        <Importer>GB</Importer>
+        <Exporter>US</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>2</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>skeletons</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>W</Source>
+    </trade>
+</trades>

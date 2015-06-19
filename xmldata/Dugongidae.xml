@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2000</Year>
+        <App>I</App>
+        <Taxon>Dugong dugon</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Sirenia</Order>
+        <Family>Dugongidae</Family>
+        <Genus>Dugong</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AU</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>2</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>T</Purpose>
+        <Source>W</Source>
+    </trade>
+    <trade>
+        <Year>2008</Year>
+        <App>I</App>
+        <Taxon>Dugong spp.</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Sirenia</Order>
+        <Family>Dugongidae</Family>
+        <Genus>Dugong</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AE</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>318</Exporter_reported_quantity>
+        <Term>specimens</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>O</Source>
+    </trade>
+    <trade>
+        <Year>2009</Year>
+        <App>I</App>
+        <Taxon>Dugong spp.</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Sirenia</Order>
+        <Family>Dugongidae</Family>
+        <Genus>Dugong</Genus>
+        <Importer>GB</Importer>
+        <Exporter>AE</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>2477</Exporter_reported_quantity>
+        <Term>bone pieces</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>O</Source>
+    </trade>
+</trades>

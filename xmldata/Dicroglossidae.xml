@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2004</Year>
+        <App>II</App>
+        <Taxon>Hoplobatrachus tigerinus</Taxon>
+        <Class>Amphibia</Class>
+        <Order>Anura</Order>
+        <Family>Dicroglossidae</Family>
+        <Genus>Hoplobatrachus</Genus>
+        <Importer>GB</Importer>
+        <Exporter>VN</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>4000</Exporter_reported_quantity>
+        <Term>meat</Term>
+        <Unit>kg</Unit>
+        <Purpose>T</Purpose>
+        <Source>C</Source>
+    </trade>
+    <trade>
+        <Year>2005</Year>
+        <App>II</App>
+        <Taxon>Hoplobatrachus tigerinus</Taxon>
+        <Class>Amphibia</Class>
+        <Order>Anura</Order>
+        <Family>Dicroglossidae</Family>
+        <Genus>Hoplobatrachus</Genus>
+        <Importer>GB</Importer>
+        <Exporter>VN</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>28860</Exporter_reported_quantity>
+        <Term>meat</Term>
+        <Unit>kg</Unit>
+        <Purpose>T</Purpose>
+        <Source>C</Source>
+    </trade>
+</trades>

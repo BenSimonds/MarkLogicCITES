@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2008</Year>
+        <App>I</App>
+        <Taxon>Priodontes maximus</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cingulata</Order>
+        <Family>Dasypodidae</Family>
+        <Genus>Priodontes</Genus>
+        <Importer>GB</Importer>
+        <Exporter>CA</Exporter>
+        <Origin>US</Origin>
+        <Importer_reported_quantity></Importer_reported_quantity>
+        <Exporter_reported_quantity>1</Exporter_reported_quantity>
+        <Term>bodies</Term>
+        <Unit></Unit>
+        <Purpose>E</Purpose>
+        <Source>O</Source>
+    </trade>
+    <trade>
+        <Year>2008</Year>
+        <App>I</App>
+        <Taxon>Priodontes maximus</Taxon>
+        <Class>Mammalia</Class>
+        <Order>Cingulata</Order>
+        <Family>Dasypodidae</Family>
+        <Genus>Priodontes</Genus>
+        <Importer>GB</Importer>
+        <Exporter>CA</Exporter>
+        <Origin>XX</Origin>
+        <Importer_reported_quantity>1</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>bodies</Term>
+        <Unit></Unit>
+        <Purpose>E</Purpose>
+        <Source>O</Source>
+    </trade>
+</trades>

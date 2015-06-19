@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<trades xmlns="http://BIPB.com/CITES">
+    <trade>
+        <Year>2003</Year>
+        <App>N</App>
+        <Taxon>Copsychus malabaricus</Taxon>
+        <Class>Aves</Class>
+        <Order>Passeriformes</Order>
+        <Family>Muscicapidae</Family>
+        <Genus>Copsychus</Genus>
+        <Importer>GB</Importer>
+        <Exporter>GB</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>1</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>live</Term>
+        <Unit></Unit>
+        <Purpose>P</Purpose>
+        <Source>U</Source>
+    </trade>
+    <trade>
+        <Year>2010</Year>
+        <App>II</App>
+        <Taxon>Liocichla omeiensis</Taxon>
+        <Class>Aves</Class>
+        <Order>Passeriformes</Order>
+        <Family>Muscicapidae</Family>
+        <Genus>Liocichla</Genus>
+        <Importer>GB</Importer>
+        <Exporter>JE</Exporter>
+        <Origin></Origin>
+        <Importer_reported_quantity>2</Importer_reported_quantity>
+        <Exporter_reported_quantity></Exporter_reported_quantity>
+        <Term>bodies</Term>
+        <Unit></Unit>
+        <Purpose>S</Purpose>
+        <Source>C</Source>
+    </trade>
+</trades>
