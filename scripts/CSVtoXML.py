@@ -13,7 +13,7 @@ import csv
 import operator
 
 csvFile = 'rawdata/comptab_2015-06-19 09-39_comma_separated.csv'
-splitlevel = 'Family'
+splitlevel = 'Taxon'
 toplevel = 'trades'
 rowlevel = 'trade'
 
@@ -45,7 +45,7 @@ for row in csvData:
         except NameError:
             pass
         #Start a new xml file:
-        xmlFile = 'xmldata/' + currentfamily + '.xml'
+        xmlFile = 'xmldata/trades/' + currentfamily + '.xml'
         xmlData = open(xmlFile, 'w')
         xmlData.write('<?xml version="1.0"?>' + "\n")
         xmlData.write('<' + toplevel + ' xmlns="http://BIPB.com/CITES">' + "\n")

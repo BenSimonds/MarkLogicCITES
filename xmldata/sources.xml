@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<sources xmlns="http://BIPB.com/CITES/sources">
+	<source id="A">Artificially propagated plants</source>
+	<source id="C">Captive bred animals</source>
+	<source id="D">Captive bred/artificially propagated</source>
+	<source id="F">Born in captivity</source>
+	<source id="I">Confiscations/Seizures</source>
+	<source id="O">Pre-Convention</source>
+	<source id="R">Ranched</source>
+	<source id="U">Source Unknown</source>
+	<source id="W">Wild</source>
+	<source id="X">Specimens taken "in the marine environment not under the jurisdiction of any state".</source>
+</sources>	

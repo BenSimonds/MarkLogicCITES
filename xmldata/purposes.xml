@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<purposes xmlns="http://BIPB.com/CITES/purposes">
+	<purpose id="B">Breeding in captivity or artificial propagation.</purpose>
+	<purpose id="E">Educational</purpose>
+	<purpose id="G">Botanical Garden</purpose>
+	<purpose id="H">Hunting Trophy</purpose>
+	<purpose id="L">Law Enforcement/Judicial/Forensic</purpose>
+	<purpose id="M">Medical (including biomedical research).</purpose>
+	<purpose id="N">Reintroduction or introduction into the wild.</purpose>
+	<purpose id="P">Personal</purpose>
+	<purpose id="Q">Circus and travelling exhibitions.</purpose>
+	<purpose id="S">Scientific</purpose>
+	<purpose id="T">Commercial</purpose>
+	<purpose id="Z">Zoo</purpose>
+</purposes>	

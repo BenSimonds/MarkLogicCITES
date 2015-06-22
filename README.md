@@ -1,6 +1,6 @@
 Aims:
 =====
-	- Build a MarkLogic database and associated app that shows data about trades of endangered animals into and out of britain.
+	- Build a MarkLogic database and associated app that shows data about trades of endangered animals into and out of Britain.
 	- Provide a search tool for finding out about different species, and some analysis of which are the most traded, different exporters etc.
 	- Tie in with images, wikipedia data, scraped with beautiful soup and added to the db or just referenced externally.
 
@@ -10,9 +10,10 @@ Tasks:
 		- Create db, forests, insert data.							-DONE
 		- Create app server.										-DONE
 	- App Tasks:
-		- Create xquery app (similar to ML top songs)
+		- Create xquery app (similar to ML top songs)				-DONE
 			- Pages: 
 				- index (main search page)
+					-Need to work on options for search to return better parsable results.
 				- advanced search
 				- record specific result with images, extra data.
 	- Data Tasks:
