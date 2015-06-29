@@ -12,13 +12,14 @@ Tasks:
 	- App Tasks:
 		- Create xquery app (similar to ML top songs)				-DONE
 			- Pages: 
-				- index (main search page)
-					-Need to work on options for search to return better parsable results.
+				- index (main search page)							-DONE
+					-Need to work on options for search to return better parsable results.	-DONE
 				- advanced search
 				- record specific result with images, extra data.
 	- Data Tasks:
 		- Download some data from CITES database. 					-DONE
 		- Parse into XML (probably in python). 						-DONE
-		- Scrape some images for each species with beautiful soup.
-		- Scrape some data from wikipedia.
+		- Scrape some images for each species with beautiful soup.	-DONE
+		- Scrape some data from wikipedia.							-DONE
+		- Map common name to species data for better headings and search. -DONE
 

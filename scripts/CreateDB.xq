@@ -46,17 +46,3 @@ let $server := admin:http-server-create(
   0,
   admin:database-get-id($config, "CITES"))
 return admin:save-configuration($server);
-
-(: load base documents - might break this out in a minute to give more control over collections, stuff.:)
-xdmp:eval('for $d in xdmp:filesystem-directory("C:\Users\ben.simonds\Documents\Marklogic CITES\xmldata")//dir:entry
-return xdmp:document-load($d//dir:pathname, 
-  <options xmlns="xdmp:document-load">
-    <uri>{fn:string($d//dir:filename)}</uri>
-    <collections>
-    	<collection>FirstTry</collection>
-      <default-namespace>http://BenSimonds.com/CITES</default-namespace>
-    </collections>
-  </options>)',  (),
-		  <options xmlns="xdmp:eval">
-		    <database>{xdmp:database("CITES")}</database>
-		  </options>)

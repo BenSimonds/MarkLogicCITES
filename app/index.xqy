@@ -2,10 +2,30 @@ xquery version "1.0-ml";
 declare namespace tr = "http://BIPB.com/CITES";
 declare namespace pp = "http://BIPB.com/CITES/purposes";
 declare namespace sr = "http://BIPB.com/CITES/sources";
+declare namespace info = "http://BIPB.com/CITES/taxa";
 import module namespace search = "http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
+
 declare variable $options := 
   <options xmlns="http://marklogic.com/appservices/search">
+  	<term>
+  	    <term-option>case-insensitive</term-option>
+  	    <term-option>stemmed</term-option>
+  	</term>
+  	<searchable-expression>
+  	    fn:collection("Trades")
+  	</searchable-expression>
+  	<search:operator name="sort">
+  	  <search:state name="newest">
+  	    <search:sort-order direction="ascending" type="xs:string">
+  	      <search:element ns="http://BIPB.com/CITES" name="Taxon"/>
+  	    </search:sort-order>
+  		<search:sort-order>
+  			<search:score/>
+  		</search:sort-order>
+  	</search:state>
+  	</search:operator>
   </options>;
+
 declare variable $q-text := 
 	let $q := xdmp:get-request-field("q", "sort:newest")
 	return $q;
@@ -14,7 +34,8 @@ declare variable $agg :=
 	return $agg;
 	
 
-declare variable $results := search:search($q-text);
+declare variable $results := search:search($q-text,$options);
+		
 
 declare function local:getquantity($trades) as xs:float {
 	let $max := for $trade in $trades/descendant-or-self::tr:trade
@@ -45,39 +66,100 @@ declare function local:getsource($trade) {
 		"Unknown"
 };
 
-declare function local:tradeaggr($doc) {
-	let $taxa := fn:distinct-values($doc//tr:Taxon)
+declare function local:getinfo($taxon) {
+	let $info_uri := fn:string-join(("taxa/",$taxon,".xml"))
+	let $info := fn:doc($info_uri)
+	let $c_name := $info//info:common_name/text()
+	return $info
+};
+
+declare function local:getimage($taxon) {
+	let $uri := local:getinfo($taxon)//info:img_uri/text()
+	return 
+	if (fn:doc($uri))
+	then <div class="pull-right"><img class="img-rounded img-species" alt="{$taxon}" src="get-file.xqy?uri={$uri}"/></div>
+	else ()
+};
+
+declare function local:getinfohtml($doc) {
+	let $taxon := fn:distinct-values($doc//tr:Taxon)
 	let $class := fn:distinct-values($doc//tr:Class)
 	let $order := fn:distinct-values($doc//tr:Order)
 	let $family := fn:distinct-values($doc//tr:Family)
-	(:Loop through taxa:)
-	let $taxa-trades :=
-		for $taxon in $taxa
-		let $trades := $doc//tr:trade[tr:Taxon eq $taxon]
-		let $years := fn:distinct-values($trades/tr:Year)
-		let $details :=
-			for $year in $years 
-				let $quantity := local:getquantity($trades[tr:Year eq $year])
-				order by -$year
-				return
-					  <tr>
-					    <td style="text-align:center">{$year}</td>
-					    <td style="text-align:center">{$quantity}</td> 
-					    
-					  </tr>
-		return <div>
-			<h4>{$taxon}</h4>
-			<p>Class: {$class}, Order: {$order}, Family: {$family}</p>
-			<table style="width:100%" class= "table">
-				<tr>
-				    <th style="text-align:center">Year</th>
-				    <th style="text-align:center">Quantity</th> 
-				</tr>
-				{$details}
-				</table>
-			</div>
-	return $taxa-trades		
+	let $common_name := local:getinfo($taxon)//info:common_name
+	let $wikilink := local:getinfo($taxon)//info:wikilink
+	let $conservation_status := local:getinfo($taxon)//info:conservation_status
+	return
+	<div>
+		{if ($common_name eq $taxon) 
+			then <h4>{$taxon}</h4>
+		else if	($common_name)
+			then <h4>{$common_name} ({$taxon})</h4> 
+			else <h4>{$taxon}</h4>}
+		{local:getimage($taxon)}
+		{if ($class and $order and $family and $wikilink) 
+			then  <p>Class: {$class}, Order: {$order}, Family: {$family} <br></br> <a href='{$wikilink}'>Wikipedia</a></p>
+			else ()}
+		{if ($conservation_status/text()) 
+			then <p>Conservation Status: {$conservation_status}</p> 
+			else ()}
+		<p>{local:getinfo($taxon)//info:info}</p>
+	</div>
+};
+
+declare function local:tradeaggr($doc) {
+	let $taxon := fn:distinct-values($doc//tr:Taxon)
+	let $trades := $doc//tr:trade[tr:Taxon eq $taxon]
+	let $years := fn:distinct-values($trades/tr:Year)
+	let $terms := fn:distinct-values(
+		for $term in $trades//tr:Term
+		order by fn:sum(local:getquantity($trades[tr:Term eq $term])) descending
+		return $term
+		)
+	let $terms_restricted := $terms[1 to 5]
+	let $terms_other :=
+		if (fn:count($terms) < 5)
+		then ()
+		else $terms[6 to fn:count($terms)]
+	let $terms_tr :=
+		for $term in $terms_restricted
+			return <th style="text-align:center">{$term}</th>
+	let $details :=
+		for $year in $years
+			let $trades_other := $trades[tr:Term = $terms_other and tr:Year eq $year]
+			let $quantity_other := local:getquantity($trades_other)
+			let $quantities := 
+				for $term in $terms_restricted
+					let $quantity := local:getquantity($trades[tr:Year eq $year and tr:Term eq $term])
+					return <td style="text-align:center">{$quantity}</td> 
+			order by -$year
+			return
+				  <tr>
+				  <td style="text-align:center">{$year}</td>
+				  <td style="text-align:center">{local:getquantity($trades[tr:Year eq $year])}</td>
+				  {$quantities}
+				  <td style="text-align:center">{$quantity_other}</td>
+				  </tr>
+				    
+
+	return <div>
+		{local:getinfohtml($doc)}
+		<b>Imports into the UK:</b>
+		<table style="width:100%" class= "table">
+			<tr>
+			    <th style="text-align:center">Year</th>
+			    <th style="text-align:center">Total</th>
+			    {$terms_tr}
+			    <th style="text-align:center">Other</th>
+			</tr>
+			{$details}
+			</table>
+			<br></br>
+		</div>
+
 };	
+
+
 
 declare function local:tradedetails($doc) {
 	let $taxa := fn:distinct-values($doc//tr:Taxon)
@@ -103,8 +185,8 @@ declare function local:tradedetails($doc) {
 				    <td>{$purpose}</td>
 				  </tr>
 		return <div>
-			<h4>{$taxon}</h4>
-			<p>Class: {$class}, Order: {$order}, Family: {$family}</p>
+			{local:getinfohtml($doc)}
+			<b>Imports into the UK:</b>
 			<table style="width:100%" class= "table">
 				<tr>
 				    <th style="text-align:center">Year</th>
@@ -114,6 +196,7 @@ declare function local:tradedetails($doc) {
 				</tr>
 				{$details}
 				</table>
+				<br></br>
 			</div>
 	return $taxa-trades			
 };
@@ -197,9 +280,17 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 									<button class="btn btn-default" type="submit">Go!</button>
 		 							</span>
 								</div>
-								<div class="checkbox">
+								
+								{if ($agg = "on") then
+									<div class="checkbox">
 									<label><input type="checkbox" name="agg" id="agg" checked="on">Aggregate Results by Year</input></label>
-								</div>
+									</div>
+								else
+									<div class="checkbox">
+									<label><input type="checkbox" name="agg" id="agg">Aggregate Results by Year</input></label>
+									</div>
+								}
+								
 							</form>
 						</div>
 					</div>
