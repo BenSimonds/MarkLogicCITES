@@ -236,8 +236,8 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="/index.xqy">Home</a></li>
-					<li><a href="#about">About</a></li>
+					<li class="active"><a href="/index.xqy">Search</a></li>
+					<li><a href="/trends.xqy">Trends</a></li>
 					<li><a href="#contact">Contact</a></li>
 				</ul>
 			</div><!--/.nav-collapse -->
