@@ -7,6 +7,41 @@ import module namespace search = "http://marklogic.com/appservices/search" at "/
 
 declare variable $options := 
   <options xmlns="http://marklogic.com/appservices/search">
+  <constraint name="year">
+  	<range type="xs:int">
+  		<element ns="http://BIPB.com/CITES" name="Year"/>
+  		<facet-option>limit=30</facet-option>
+  		<facet-option>descending</facet-option>
+  	</range>
+  </constraint>
+  <constraint name="common_name">
+  	<value type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
+  		<element ns="http://BIPB.com/CITES" name="Common_Name"/>
+  	</value>
+  </constraint>
+  <constraint name="class">
+  	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
+  		<element ns="http://BIPB.com/CITES" name="Class"/>
+  		<facet-option>limit=30</facet-option>
+  		<facet-option>descending</facet-option>
+  	</range>
+  </constraint>
+  <constraint name="order">
+  	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
+  		<element ns="http://BIPB.com/CITES" name="Order"/>
+  		<facet-option>limit=30</facet-option>
+  		<facet-option>frequency-order</facet-option>
+  		<facet-option>descending</facet-option>
+  	</range>
+  </constraint> 
+  <constraint name="family">
+  	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
+  		<element ns="http://BIPB.com/CITES" name="Family"/>
+  		<facet-option>limit=30</facet-option>
+  		<facet-option>frequency-order</facet-option>
+  		<facet-option>descending</facet-option>
+  	</range>
+  </constraint> 
   	<term>
   	    <term-option>case-insensitive</term-option>
   	    <term-option>stemmed</term-option>
@@ -15,8 +50,8 @@ declare variable $options :=
   	    fn:collection("Trades")
   	</searchable-expression>
   	<search:operator name="sort">
-  	  <search:state name="newest">
-  	    <search:sort-order direction="ascending" type="xs:string">
+  	  <search:state name="alphabetical">
+  	    <search:sort-order direction="ascending" type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
   	      <search:element ns="http://BIPB.com/CITES" name="Taxon"/>
   	    </search:sort-order>
   		<search:sort-order>
@@ -27,14 +62,102 @@ declare variable $options :=
   </options>;
 
 declare variable $q-text := 
-	let $q := xdmp:get-request-field("q", "sort:newest")
+	let $q := xdmp:get-request-field("q", "sort:alphabetical")
 	return $q;
 declare variable $agg := 
 	let $agg := xdmp:get-request-field("agg")
 	return $agg;
 	
 
-declare variable $results := search:search($q-text,$options);
+declare variable $results := search:search($q-text,$options, xs:unsignedLong(xdmp:get-request-field("start","1")));
+
+declare function local:pagination($resultspage) {
+	let $start := xs:unsignedLong($resultspage/@start)
+	let $length := xs:unsignedLong($resultspage/@page-length)
+	let $total := xs:unsignedLong($resultspage/@total)
+	let $last := xs:unsignedLong($start + $length - 1)
+	let $end := if ($total > $last) then $last else $total
+	let $qtext := $resultspage/search:qtext[1]/text()
+	let $next := if ($total > $last) then $last + 1 else ()
+	let $previous := if (($start > 1) and ($start - $length > 0)) then fn:max((($start - $length),1)) else ()
+	let $next-href := 
+		if ($next)
+		then fn:concat("/index.xqy?q=",if ($qtext) then ($qtext) else (),"&amp;start=",$next,"&amp;submitbtn=page","&amp;agg=", $agg)
+		else ()
+	let $previous-href := 
+		if ($previous)
+		then fn:concat("/index.xqy?q=",if ($qtext) then ($qtext) else (),"&amp;start=",$previous,"&amp;submitbtn=page","&amp;agg=", $agg)
+		else ()
+	let $total-pages := fn:ceiling($total div $length)
+	let $currpage := fn:ceiling($start div $length)
+	let $pagemin := 
+		fn:min(for $i in (1 to 4)
+				where ($currpage - $i) > 0
+				return $currpage - $i)
+	let $rangestart := fn:max(($pagemin, 1))
+	let $rangeend := fn:min(($total-pages,$rangestart + 4))
+
+	return (
+    	if($rangestart eq $rangeend)
+    	then ()
+    	else
+    	<nav>
+    		<ul class="pagination pagination-sm">
+    			{if ($previous) 
+    			then <li><a href="{$previous-href}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li> else ()}
+    			{for $i in ($rangestart to $rangeend)
+    				let $page-start := (($length * $i) + 1) - $length
+    				let $page-href := concat("/index.xqy?q=",if ($qtext) then ($qtext) else (),"&amp;start=",$page-start,"&amp;submitbtn=page")
+    				return 
+    					if ($i eq $currpage)
+    					then <li class="active"><span >{$i}</span></li>
+    					else <li><a href="{$page-href}">{$i}</a></li>
+    			}
+    			{ if ($next) 
+    				then <li><a href="{$next-href}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li> else ()}
+    		</ul>
+    	</nav>
+   )
+};
+
+declare function local:getfacetlink($facet as xs:string, $value as xs:string, $include as xs:boolean) as xs:string{
+	let $search-terms := fn:tokenize($q-text, '\+') (:break up search terms into units:)
+	let $search-facet := fn:string-join(($facet, ':' , $value))
+	let $terms_keep :=
+		for $term in $search-terms
+		where (fn:not(fn:contains($term, $facet)))
+		return $term
+	let $terms_keep := fn:string-join($terms_keep, '+')
+	let $link :=
+		if ($include)
+		then fn:string-join(('http://localhost:8050/index.xqy?q=', $terms_keep, ' ' , $search-facet, '&amp;agg=',$agg))
+		else fn:string-join(('http://localhost:8050/index.xqy?q=', $search-facet, '&amp;agg=',$agg))
+  	return $link
+};
+
+
+declare function local:facets()
+{
+  for $facet in $results//search:facet
+  	let $facet-name := $facet/@name/string()
+  	let $facet-values :=
+  		for $facet-value in $facet/search:facet-value
+  			let $value-name := 
+  				if ($facet-value/@name ne '')
+  				then xs:string($facet-value/@name/string())
+  				else "Unknown"
+  			let $value-count := $facet-value/@count
+  			let $value-text :=
+  				if ($value-count >= 1000)
+  				then fn:string-join((xs:string(fn:floor($value-count div 1000)) , "k+"))
+  				else $value-count/string()
+  			return <li> <a href="{local:getfacetlink($facet-name,$facet-value,xs:boolean(1))}">{$facet-value}</a>&nbsp;<small>[{$value-text}]</small></li> 
+  	return
+  		<div class="facet">
+  			<h3>{$facet-name}</h3>
+  			<ul>{$facet-values}</ul>
+  		</div>
+};
 		
 
 declare function local:getquantity($trades) as xs:float {
@@ -89,17 +212,30 @@ declare function local:getinfohtml($doc) {
 	let $common_name := local:getinfo($taxon)//info:common_name
 	let $wikilink := local:getinfo($taxon)//info:wikilink
 	let $conservation_status := local:getinfo($taxon)//info:conservation_status
+	let $c-quoted := fn:string-join(("&#34;",$common_name,"&#34;"))
+	let $t-quoted := fn:string-join(("&#34;",$taxon,"&#34;"))
 	return
 	<div>
 		{if ($common_name eq $taxon) 
-			then <h4>{$taxon}</h4>
-		else if	($common_name)
-			then <h4>{$common_name} ({$taxon})</h4> 
-			else <h4>{$taxon}</h4>}
+			then <h4>{$taxon}<a href="{local:getfacetlink('taxon',$t-quoted,xs:boolean(0))}">&nbsp;&#x1F517;</a></h4>
+		else if ($common_name ne '')
+			then <h4>{$common_name} ({$taxon})<a href="{local:getfacetlink('common_name',$c-quoted,xs:boolean(0))}">&nbsp;&#x1F517;</a></h4>
+		else <h4>{$taxon}<a href="{local:getfacetlink('taxon',$t-quoted,xs:boolean(0))}">&nbsp;&#x1F517;</a></h4>}
 		{local:getimage($taxon)}
-		{if ($class and $order and $family and $wikilink) 
-			then  <p>Class: {$class}, Order: {$order}, Family: {$family} <br></br> <a href='{$wikilink}'>Wikipedia</a></p>
+		<p>
+		{if ($class) 
+			then <span>Class: <a href="{local:getfacetlink('class',$class,xs:boolean(0))}">{$class}&nbsp; </a> </span>
 			else ()}
+		{if ($order) 
+			then <span>Order: <a href="{local:getfacetlink('order',$order,xs:boolean(0))}">{$order}&nbsp; </a> </span>
+			else ()}
+		{if ($family) 
+			then <span>Family: <a href="{local:getfacetlink('family',$family,xs:boolean(0))}">{$family}&nbsp; </a> </span>
+			else ()}
+		{if ($wikilink) 
+			then <span><a href="{$wikilink}">Wikipedia</a> </span>
+			else ()}	
+		</p>
 		{if ($conservation_status/text()) 
 			then <p>Conservation Status: {$conservation_status}</p> 
 			else ()}
@@ -113,32 +249,38 @@ declare function local:tradeaggr($doc) {
 	let $years := fn:distinct-values($trades/tr:Year)
 	let $terms := fn:distinct-values(
 		for $term in $trades//tr:Term
-		order by fn:sum(local:getquantity($trades[tr:Term eq $term])) descending
+		order by fn:sum($trades[tr:Term eq $term]/tr:Quantity) descending
 		return $term
 		)
-	let $terms_restricted := $terms[1 to 5]
-	let $terms_other :=
-		if (fn:count($terms) < 5)
-		then ()
-		else $terms[6 to fn:count($terms)]
+	let $show_other := if (fn:count($terms) >= 3)
+						then fn:boolean("1")
+						else fn:boolean(())
+	let $terms_restricted := if ($show_other) then $terms[1 to 3] else $terms
+	let $terms_other :=	if ($show_other) then $terms[4 to fn:count($terms)] else ()
 	let $terms_tr :=
 		for $term in $terms_restricted
-			return <th style="text-align:center">{$term}</th>
+			let $words := fn:tokenize($term, ' ')
+			let $cap-first := for $word in $words
+				return fn:string-join((fn:upper-case(fn:substring($word, 1,1)),fn:substring($word, 2)))
+			return <th style="text-align:center">{fn:string-join($cap-first, ' ') }</th>
 	let $details :=
 		for $year in $years
-			let $trades_other := $trades[tr:Term = $terms_other and tr:Year eq $year]
-			let $quantity_other := local:getquantity($trades_other)
+			let $trades_other := $trades[tr:Year eq $year and tr:Term eq $terms_other]
+			let $quantity_other := fn:sum($trades_other/tr:Quantity)
 			let $quantities := 
 				for $term in $terms_restricted
-					let $quantity := local:getquantity($trades[tr:Year eq $year and tr:Term eq $term])
+					let $quantity := fn:sum($trades[tr:Year eq $year and tr:Term eq $term]/tr:Quantity)
 					return <td style="text-align:center">{$quantity}</td> 
 			order by -$year
 			return
 				  <tr>
 				  <td style="text-align:center">{$year}</td>
-				  <td style="text-align:center">{local:getquantity($trades[tr:Year eq $year])}</td>
+				  <td style="text-align:center">{fn:sum($trades[tr:Year eq $year]/tr:Quantity)}</td>
 				  {$quantities}
-				  <td style="text-align:center">{$quantity_other}</td>
+				  {if ($show_other)
+				  	then <td style="text-align:center">{$quantity_other}</td>
+				  	else ()
+				  }
 				  </tr>
 				    
 
@@ -150,7 +292,10 @@ declare function local:tradeaggr($doc) {
 			    <th style="text-align:center">Year</th>
 			    <th style="text-align:center">Total</th>
 			    {$terms_tr}
-			    <th style="text-align:center">Other</th>
+			    {if ($show_other)
+				  	then <th style="text-align:center">Other</th>
+				  	else ()
+				  }
 			</tr>
 			{$details}
 			</table>
@@ -176,11 +321,12 @@ declare function local:tradedetails($doc) {
 			let $from := $trade/tr:Exporter
 			let $purpose := local:getpurpose($trade)
 			let $source := local:getsource($trade)
+			let $quantity := $trade/tr:Quantity
 			order by -$year
 			return
 				  <tr>
 				    <td style="text-align:center">{$year}</td>
-				    <td style="text-align:center">{local:getquantity($trade)}</td> 
+				    <td style="text-align:center">{$quantity}</td> 
 				    <td>{$source}</td>
 				    <td>{$purpose}</td>
 				  </tr>
@@ -213,7 +359,16 @@ declare function local:search-results() {
 				local:tradedetails($doc)
 	return 
 		if ($items)
-		then ($items)
+		then 
+			<div>
+				<div>{local:pagination($results)}</div>
+				<div class="row">
+					<div class="col-md-9">
+						<p>Search took: {xdmp:elapsed-time()}</p>
+						{($items)}
+					</div>
+				</div>
+			</div>
 	else <div><p>Sorry, no results for your search.</p></div>
 };
 
@@ -229,7 +384,7 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 	<meta name="author" content="Ben Simonds"></meta>
 	<link rel="icon" href="../../favicon.ico"></link>
 
-	<title>CITES - Convention on International trade in Endangered Species of Wild Fauna and Flora</title>
+	<title>CITES Trades</title>
 
 	<!-- Bootstrap core CSS -->
 	<link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"></link>
@@ -250,11 +405,11 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="#">CITES Imports into Great Britain</a>
+				<a class="navbar-brand" href="/index.xqy">CITES Imports into Great Britain</a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="#">Home</a></li>
+					<li class="active"><a href="/index.xqy">Home</a></li>
 					<li><a href="#about">About</a></li>
 					<li><a href="#contact">Contact</a></li>
 				</ul>
@@ -268,6 +423,7 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 			<div class="row">
 				<div class="col-md-3">
 					<h2>Menus And Stuff</h2>
+					{local:facets()}
 				</div>
 				<div class="col-md-9">
 					<div class="row">
@@ -294,13 +450,7 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 							</form>
 						</div>
 					</div>
-					<div class="row">
-						<div class="col-md-9">
-							{
-								local:search-results()
-							}
-						</div>
-					</div>
+					{local:search-results()}
 				</div>
 			</div> <!--End of row-->	
 		</div>
