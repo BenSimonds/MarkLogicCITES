@@ -4,62 +4,9 @@ declare namespace pp = "http://BIPB.com/CITES/purposes";
 declare namespace sr = "http://BIPB.com/CITES/sources";
 declare namespace info = "http://BIPB.com/CITES/taxa";
 import module namespace search = "http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
-
-declare variable $options := 
-  <options xmlns="http://marklogic.com/appservices/search">
-  <constraint name="year">
-  	<range type="xs:int">
-  		<element ns="http://BIPB.com/CITES" name="Year"/>
-  		<facet-option>limit=30</facet-option>
-  		<facet-option>descending</facet-option>
-  	</range>
-  </constraint>
-  <constraint name="common_name">
-  	<value type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
-  		<element ns="http://BIPB.com/CITES" name="Common_Name"/>
-  	</value>
-  </constraint>
-  <constraint name="class">
-  	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
-  		<element ns="http://BIPB.com/CITES" name="Class"/>
-  		<facet-option>limit=30</facet-option>
-  		<facet-option>descending</facet-option>
-  	</range>
-  </constraint>
-  <constraint name="order">
-  	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
-  		<element ns="http://BIPB.com/CITES" name="Order"/>
-  		<facet-option>limit=30</facet-option>
-  		<facet-option>frequency-order</facet-option>
-  		<facet-option>descending</facet-option>
-  	</range>
-  </constraint> 
-  <constraint name="family">
-  	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
-  		<element ns="http://BIPB.com/CITES" name="Family"/>
-  		<facet-option>limit=30</facet-option>
-  		<facet-option>frequency-order</facet-option>
-  		<facet-option>descending</facet-option>
-  	</range>
-  </constraint> 
-  	<term>
-  	    <term-option>case-insensitive</term-option>
-  	    <term-option>stemmed</term-option>
-  	</term>
-  	<searchable-expression>
-  	    fn:collection("Trades")
-  	</searchable-expression>
-  	<search:operator name="sort">
-  	  <search:state name="alphabetical">
-  	    <search:sort-order direction="ascending" type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
-  	      <search:element ns="http://BIPB.com/CITES" name="Taxon"/>
-  	    </search:sort-order>
-  		<search:sort-order>
-  			<search:score/>
-  		</search:sort-order>
-  	</search:state>
-  	</search:operator>
-  </options>;
+import module namespace fc="http://BIPB.com/CITES/facets" at "/facets.xqy";
+import module namespace op="http://BIPB.com/CITES/options" at "/options.xqy";
+import module namespace tools="http://BIPB.com/CITES/tools" at "/tools.xqy";
 
 declare variable $q-text := 
 	let $q := xdmp:get-request-field("q", "sort:alphabetical")
@@ -67,9 +14,8 @@ declare variable $q-text :=
 declare variable $agg := 
 	let $agg := xdmp:get-request-field("agg")
 	return $agg;
-	
 
-declare variable $results := search:search($q-text,$options, xs:unsignedLong(xdmp:get-request-field("start","1")));
+declare variable $results := search:search($q-text,$op:options, xs:unsignedLong(xdmp:get-request-field("start","1")));
 
 declare function local:pagination($resultspage) {
 	let $start := xs:unsignedLong($resultspage/@start)
@@ -120,128 +66,9 @@ declare function local:pagination($resultspage) {
    )
 };
 
-declare function local:getfacetlink($facet as xs:string, $value as xs:string, $include as xs:boolean) as xs:string{
-	let $search-terms := fn:tokenize($q-text, '\+') (:break up search terms into units:)
-	let $search-facet := fn:string-join(($facet, ':' , $value))
-	let $terms_keep :=
-		for $term in $search-terms
-		where (fn:not(fn:contains($term, $facet)))
-		return $term
-	let $terms_keep := fn:string-join($terms_keep, '+')
-	let $link :=
-		if ($include)
-		then fn:string-join(('http://localhost:8050/index.xqy?q=', $terms_keep, ' ' , $search-facet, '&amp;agg=',$agg))
-		else fn:string-join(('http://localhost:8050/index.xqy?q=', $search-facet, '&amp;agg=',$agg))
-  	return $link
-};
 
 
-declare function local:facets()
-{
-  for $facet in $results//search:facet
-  	let $facet-name := $facet/@name/string()
-  	let $facet-values :=
-  		for $facet-value in $facet/search:facet-value
-  			let $value-name := 
-  				if ($facet-value/@name ne '')
-  				then xs:string($facet-value/@name/string())
-  				else "Unknown"
-  			let $value-count := $facet-value/@count
-  			let $value-text :=
-  				if ($value-count >= 1000)
-  				then fn:string-join((xs:string(fn:floor($value-count div 1000)) , "k+"))
-  				else $value-count/string()
-  			return <li> <a href="{local:getfacetlink($facet-name,$facet-value,xs:boolean(1))}">{$facet-value}</a>&nbsp;<small>[{$value-text}]</small></li> 
-  	return
-  		<div class="facet">
-  			<h3>{$facet-name}</h3>
-  			<ul>{$facet-values}</ul>
-  		</div>
-};
-		
 
-declare function local:getquantity($trades) as xs:float {
-	let $max := for $trade in $trades/descendant-or-self::tr:trade
-		let $importer := xs:float($trade/tr:Importer_reported_quantity/text())
-  		let $exporter := xs:float($trade/tr:Exporter_reported_quantity/text())
-  		let $max := fn:max(($importer, $exporter))
-  		return $max
-	return fn:round(fn:sum($max))
-  	};
-
-declare function local:getpurpose($trade) {
-	let $code := $trade/tr:Purpose
-	let $purpose := fn:doc("purposes.xml")/pp:purposes/pp:purpose[@id eq $code]/text()
-	return 
-	if ($purpose) then
-		$purpose
-	else
-		"Unknown"
-};
-
-declare function local:getsource($trade) {
-	let $code := $trade/tr:Source
-	let $source := fn:doc("sources.xml")/sr:sources/sr:source[@id eq $code]/text()
-	return 
-	if ($source) then
-		$source
-	else
-		"Unknown"
-};
-
-declare function local:getinfo($taxon) {
-	let $info_uri := fn:string-join(("taxa/",$taxon,".xml"))
-	let $info := fn:doc($info_uri)
-	let $c_name := $info//info:common_name/text()
-	return $info
-};
-
-declare function local:getimage($taxon) {
-	let $uri := local:getinfo($taxon)//info:img_uri/text()
-	return 
-	if (fn:doc($uri))
-	then <div class="pull-right"><img class="img-rounded img-species" alt="{$taxon}" src="get-file.xqy?uri={$uri}"/></div>
-	else ()
-};
-
-declare function local:getinfohtml($doc) {
-	let $taxon := fn:distinct-values($doc//tr:Taxon)
-	let $class := fn:distinct-values($doc//tr:Class)
-	let $order := fn:distinct-values($doc//tr:Order)
-	let $family := fn:distinct-values($doc//tr:Family)
-	let $common_name := local:getinfo($taxon)//info:common_name
-	let $wikilink := local:getinfo($taxon)//info:wikilink
-	let $conservation_status := local:getinfo($taxon)//info:conservation_status
-	let $c-quoted := fn:string-join(("&#34;",$common_name,"&#34;"))
-	let $t-quoted := fn:string-join(("&#34;",$taxon,"&#34;"))
-	return
-	<div>
-		{if ($common_name eq $taxon) 
-			then <h4>{$taxon}<a href="{local:getfacetlink('taxon',$t-quoted,xs:boolean(0))}">&nbsp;&#x1F517;</a></h4>
-		else if ($common_name ne '')
-			then <h4>{$common_name} ({$taxon})<a href="{local:getfacetlink('common_name',$c-quoted,xs:boolean(0))}">&nbsp;&#x1F517;</a></h4>
-		else <h4>{$taxon}<a href="{local:getfacetlink('taxon',$t-quoted,xs:boolean(0))}">&nbsp;&#x1F517;</a></h4>}
-		{local:getimage($taxon)}
-		<p>
-		{if ($class) 
-			then <span>Class: <a href="{local:getfacetlink('class',$class,xs:boolean(0))}">{$class}&nbsp; </a> </span>
-			else ()}
-		{if ($order) 
-			then <span>Order: <a href="{local:getfacetlink('order',$order,xs:boolean(0))}">{$order}&nbsp; </a> </span>
-			else ()}
-		{if ($family) 
-			then <span>Family: <a href="{local:getfacetlink('family',$family,xs:boolean(0))}">{$family}&nbsp; </a> </span>
-			else ()}
-		{if ($wikilink) 
-			then <span><a href="{$wikilink}">Wikipedia</a> </span>
-			else ()}	
-		</p>
-		{if ($conservation_status/text()) 
-			then <p>Conservation Status: {$conservation_status}</p> 
-			else ()}
-		<p>{local:getinfo($taxon)//info:info}</p>
-	</div>
-};
 
 declare function local:tradeaggr($doc) {
 	let $taxon := fn:distinct-values($doc//tr:Taxon)
@@ -260,9 +87,7 @@ declare function local:tradeaggr($doc) {
 	let $terms_tr :=
 		for $term in $terms_restricted
 			let $words := fn:tokenize($term, ' ')
-			let $cap-first := for $word in $words
-				return fn:string-join((fn:upper-case(fn:substring($word, 1,1)),fn:substring($word, 2)))
-			return <th style="text-align:center">{fn:string-join($cap-first, ' ') }</th>
+			return <th style="text-align:center;text-transform:capitalize">{fn:string-join($words, ' ') }</th>
 	let $details :=
 		for $year in $years
 			let $trades_other := $trades[tr:Year eq $year and tr:Term eq $terms_other]
@@ -285,7 +110,7 @@ declare function local:tradeaggr($doc) {
 				    
 
 	return <div>
-		{local:getinfohtml($doc)}
+		{tools:getinfohtml($doc)}
 		<b>Imports into the UK:</b>
 		<table style="width:100%" class= "table">
 			<tr>
@@ -319,24 +144,26 @@ declare function local:tradedetails($doc) {
 			for $trade in $trades
 			let $year := $trade/tr:Year
 			let $from := $trade/tr:Exporter
-			let $purpose := local:getpurpose($trade)
-			let $source := local:getsource($trade)
+			let $purpose := tools:getpurpose($trade)
+			let $source := tools:getsource($trade)
 			let $quantity := $trade/tr:Quantity
 			order by -$year
 			return
 				  <tr>
 				    <td style="text-align:center">{$year}</td>
 				    <td style="text-align:center">{$quantity}</td> 
+				    <td>{tools:getcountry($from)}</td>
 				    <td>{$source}</td>
 				    <td>{$purpose}</td>
 				  </tr>
 		return <div>
-			{local:getinfohtml($doc)}
+			{tools:getinfohtml($doc)}
 			<b>Imports into the UK:</b>
 			<table style="width:100%" class= "table">
 				<tr>
 				    <th style="text-align:center">Year</th>
 				    <th style="text-align:center">Quantity</th> 
+				    <th>Exporter</th>
 				    <th>Source</th>
 				    <th>Purpose</th>
 				</tr>
@@ -364,7 +191,7 @@ declare function local:search-results() {
 				<div>{local:pagination($results)}</div>
 				<div class="row">
 					<div class="col-md-9">
-						<p>Search took: {xdmp:elapsed-time()}</p>
+						<p>Search took: {fn:substring(xs:string(xdmp:elapsed-time()),3,3)}s</p>
 						{($items)}
 					</div>
 				</div>
@@ -422,8 +249,7 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 		<div class="main">
 			<div class="row">
 				<div class="col-md-3">
-					<h2>Menus And Stuff</h2>
-					{local:facets()}
+					{fc:facets($results)}
 				</div>
 				<div class="col-md-9">
 					<div class="row">
