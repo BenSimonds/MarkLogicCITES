@@ -140,7 +140,7 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="/index.xqy">Search</a></li>
 					<li><a href="/trends.xqy">Trends</a></li>
-					<li><a href="#contact">Contact</a></li>
+					<li><a href="https://github.com/BenSimonds/MarkLogicDemoApp">Docs</a></li>
 				</ul>
 			</div><!--/.nav-collapse -->
 		</div>
