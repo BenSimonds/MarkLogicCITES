@@ -4,7 +4,8 @@ An application that uses data from the [CITES trades database](http://trade.cite
 
 Aims:
 =====
-1.Build a MarkLogic database and associated app that shows data about trades of endangered animals into and out of Britain.
+
+1. Build a MarkLogic database and associated app that shows data about trades of endangered animals into and out of Britain.
 2. Provide a search tool for finding out about different species, and some analysis of which are the most traded, different exporters etc.
 3. Tie in with images, wikipedia data, scraped with beautiful soup and added to the db or just referenced externally.
 
