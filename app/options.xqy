@@ -5,6 +5,7 @@ import module namespace search = "http://marklogic.com/appservices/search" at "/
 
 declare variable $options := 
   <options xmlns="http://marklogic.com/appservices/search">
+  <!--
   <constraint name="year">
   	<range type="xs:int">
   		<element ns="http://BIPB.com/CITES" name="Year"/>
@@ -12,6 +13,7 @@ declare variable $options :=
   		<facet-option>descending</facet-option>
   	</range>
   </constraint>
+  -->
   <constraint name="common_name">
   	<value type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
   		<element ns="http://BIPB.com/CITES" name="Common_Name"/>

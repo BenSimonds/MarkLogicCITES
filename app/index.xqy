@@ -232,7 +232,10 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="/index.xqy">CITES Imports into Great Britain</a>
+				<a class="navbar-brand" href="#">
+				    <img class="brandimg" alt="Brand" src="img/citeslogotiny.png"></img>
+				</a>
+				<a class="navbar-brand" href="/index.xqy">Imports into Great Britain</a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">

@@ -45,6 +45,16 @@ declare function getsource($trade) {
 		"Unknown"
 };
 
+declare function getsource_code($code) {
+	let $source := fn:doc("sources.xml")/sr:sources/sr:source[@id eq $code]/text()
+	return 
+	if ($source) then
+		$source
+	else
+		"Unknown"
+};
+
+
 declare function getinfo($taxon) {
 	let $info_uri := fn:string-join(("taxa/",$taxon,".xml"))
 	let $info := fn:doc($info_uri)

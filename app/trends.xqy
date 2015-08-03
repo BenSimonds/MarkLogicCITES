@@ -4,6 +4,7 @@ declare namespace pp = "http://BIPB.com/CITES/purposes";
 declare namespace sr = "http://BIPB.com/CITES/sources";
 declare namespace info = "http://BIPB.com/CITES/taxa";
 import module namespace search = "http://marklogic.com/appservices/search" at "/MarkLogic/appservices/search/search.xqy";
+import module namespace json="http://marklogic.com/xdmp/json" at "/MarkLogic/json/json.xqy";
 import module namespace fc="http://BIPB.com/CITES/facets" at "/facets.xqy";
 import module namespace op="http://BIPB.com/CITES/options" at "/options.xqy";
 import module namespace tools="http://BIPB.com/CITES/tools" at "/tools.xqy";
@@ -17,11 +18,12 @@ declare variable $agg :=
 	let $agg := xdmp:get-request-field("agg")
 	return $agg;
 
-declare variable $results := cts:search(fn:collection("Trades"),$q-text);
+declare variable $results := cts:contains(fn:collection("Trades"),$q-text);
 
-declare variable $alltrades := if ($q-text ne '') then $results//tr:trade else fn:collection("Trades")//tr:trade;
+declare variable $alltrades := if ($q-text ne '') then $results/tr:trades/tr:trade else fn:collection("Trades")/tr:trades/tr:trade;
+declare variable $refinedtrades := local:refineresults($alltrades);
 
-declare function local:simpletest() {
+declare function local:simplejson() {
 	let $trades := local:refineresults($alltrades)
 	let $years := fn:distinct-values($trades/tr:Year)
 	let $a := 
@@ -29,25 +31,58 @@ declare function local:simpletest() {
 		let $q := fn:sum($trades[tr:Year eq $year]/tr:Quantity)
 		let $q-nice := fn:format-number($q,'#,##0')
 		order by $year
-		return <p> {$year}:{$q} </p>
-	return $a
+		return fn:string-join(("{&#34;Year&#34;:&#34;",xs:string($year),"&#34;,&#34;Quantity&#34;:",xs:string($q),"}"))
+	let $b := 	fn:string-join($a,',')
+	return fn:string-join(("{&#34;trades&#34;:[",$b,"]}"))
+		
+		
+};
+
+
+declare function local:simpletable() {
+	let $trades := local:refineresults($alltrades)
+	let $years := fn:distinct-values($trades/tr:Year)
+	let $a := 
+		for $year in $years	
+		let $q := fn:sum($trades[tr:Year eq $year]/tr:Quantity)
+		let $q-nice := fn:format-number($q,'#,##0')
+		order by $year
+		return 
+		<tr>
+			<td style="text-align:center">{$year}</td>
+			<td style="text-align:center">{$q-nice}</td>
+		</tr>
+	return 
+		<table class="table" style="width:100%">
+			<tr>
+				<th style="text-align:center">Year</th>
+				<th style="text-align:center">Quantity</th>
+			</tr>
+			{$a}
+		</table>
 };
 
 declare function local:refineresults($alltrades) {
+	let $cname := xdmp:get-request-field("common_name",())
 	let $class := xdmp:get-request-field("class",())
-	let $order := xdmp:get-request-field("order")
-	let $family := xdmp:get-request-field("family")
-	let $yearstart := xdmp:get-request-field("startyear")
-	let $yearend := xdmp:get-request-field("endyear")
+	let $order := xdmp:get-request-field("order",())
+	let $family := xdmp:get-request-field("family",())
+	let $exporter := xdmp:get-request-field("exporter",())
+	let $yearstart := xdmp:get-request-field("yearstart",())
+	let $yearend := xdmp:get-request-field("yearend",())
+	let $source := xdmp:get-request-field("source",())
 	let $trades-return := 
 	for $trade in $alltrades
-		let $c := if ($class eq "Any") then xs:boolean(1) else if ($class) then ($trade/tr:Class = $class) else xs:boolean(1)
-		let $o := if ($order eq "Any") then xs:boolean(1) else if ($order) then ($trade/tr:Order = $order) else xs:boolean(1) 
-		let $f := if ($family eq "Any") then xs:boolean(1) else if ($family) then ($trade/tr:Family = $family) else xs:boolean(1) 
-		let $y1 := if ($yearstart eq "Any")then xs:boolean(1) else if ($yearstart) then ($trade/tr:Year >= xs:int($yearstart)) else xs:boolean(1) 
-		let $y2 := if ($yearend eq "Any")then xs:boolean(1) else if ($yearend) then ($trade/tr:Year <= xs:int($yearend)) else xs:boolean(1)
+		let $cn := if ($cname eq "Any")		then xs:boolean(1) else if ($cname) 	then ($trade/tr:Common_Name = $cname) 		else xs:boolean(1)
+		let $c := if ($class eq "Any")		then xs:boolean(1) else if ($class) 	then ($trade/tr:Class = $class) 			else xs:boolean(1)
+		let $o := if ($order eq "Any")		then xs:boolean(1) else if ($order) 	then ($trade/tr:Order = $order) 			else xs:boolean(1) 
+		let $f := if ($family eq "Any") 	then xs:boolean(1) else if ($family) 	then ($trade/tr:Family = $family) 			else xs:boolean(1) 
+		let $e := if ($exporter eq "Any") 	then xs:boolean(1) else if ($exporter)	then ($trade/tr:Exporter = $exporter) 		else xs:boolean(1) 
+		let $y1 := if ($yearstart eq "Any")	then xs:boolean(1) else if ($yearstart)	then ($trade/tr:Year >= xs:int($yearstart)) else xs:boolean(1) 
+		let $y2 := if ($yearend eq "Any") 	then xs:boolean(1) else if ($yearend) 	then ($trade/tr:Year <= xs:int($yearend)) 	else xs:boolean(1)
+		let $s := if ($source eq "Any") 	then xs:boolean(1) else if ($source) 	then ($trade/tr:Source = $source)		 	else xs:boolean(1)
 		where 
-		($c and $o and $f and $y1 and $y2)
+		($cn and $c and $o and $e and $f and $y1 and $y2 and $s)
 		return $trade
 	return $trades-return
 };
@@ -73,8 +108,8 @@ declare function local:formfield($name, $field, $options) {
 			order by $option
 			return
 			if (xdmp:get-request-field($field) eq $option) 
-			then <option selected="selected">{$option}</option>
-			else <option>{$option}</option>
+			then <option value="{$option}" selected="selected">{if ($option ne '') then $option else "Unknown"}</option>
+			else <option value="{$option}" >{if ($option ne '') then $option else "Unknown"}</option>
 			}
 			</select>
 		</div>
@@ -84,15 +119,51 @@ declare function local:formfield($name, $field, $options) {
 declare function local:refineform() {
 	let $form :=
 		<div>
+
 		<form name="form2" method="get" action="{fn:string-join(("trends.xqy?q=",xdmp:get-request-field("q")))}" id="form2">
+			<h3>Search</h3>
 			<div class="form-group">
-				{local:formfield("Start Year", "yearstart", fn:distinct-values($alltrades//tr:Year))}
-				{local:formfield("End Year", "yearend",fn:distinct-values($alltrades//tr:Year))}
-				{local:formfield("Class", "class",fn:distinct-values($alltrades//tr:Class))}
-				{local:formfield("Order", "order",fn:distinct-values($alltrades//tr:Order))}
-				{local:formfield("Family", "family",fn:distinct-values($alltrades//tr:Family))}
-				{local:formfield("Common Name", "common_name",fn:distinct-values($alltrades//tr:Common_Name))}
+				<div class="input-group">
+					<span class="input-group-addon" id="basic-addon1">Search</span>
+					<input type="text" class="form-control" placeholder="Taxon, Genus, Family etc." aria-describedby="basic-addon1" name="q" id="q" value="{$q-text}"></input>
+				</div>
+			</div>		
+			<h3>Refine</h3>
+			<div class="form-group">
+				{local:formfield("Start Year", "yearstart", fn:distinct-values($refinedtrades/tr:Year))}
+				{local:formfield("End Year", "yearend",fn:distinct-values($refinedtrades/tr:Year))}
+				<div>
+					<label for="startyear" class="control-label">Exporter</label>
+					<select class="form-control"  name= "exporter" id="exporter">
+						<option>Any</option>
+				{for $option in fn:distinct-values($refinedtrades/tr:Exporter)
+					order by $option
+					return
+					if (xdmp:get-request-field("exporter") eq $option) 
+					then <option value="{$option}" selected="selected">{tools:getcountry($option)}</option>
+					else <option value="{$option}">{tools:getcountry($option)}</option>
+				}
+					</select>
+				</div>
+				<div>
+					<label for="startyear" class="control-label">Source</label>
+					<select class="form-control"  name= "source" id="source">
+						<option>Any</option>
+				{for $option in fn:distinct-values($refinedtrades/tr:Source)
+					order by $option
+					return
+					if (xdmp:get-request-field("source") eq $option) 
+					then <option value="{$option}" selected="selected">{tools:getsource_code($option)}</option>
+					else <option value="{$option}">{tools:getsource_code($option)}</option>
+				}
+					</select>
+				</div>
+				{local:formfield("Class", "class",fn:distinct-values($refinedtrades/tr:Class))}
+				{local:formfield("Order", "order",fn:distinct-values($refinedtrades/tr:Order))}
+				{local:formfield("Family", "family",fn:distinct-values($refinedtrades/tr:Family))}
+				{local:formfield("Common Name", "common_name",fn:distinct-values($refinedtrades/tr:Common_Name))}
 				<br/>
+				
 				<input class="btn btn-default" type="submit" value="Refine"></input>
 			</div>
 		</form>
@@ -134,7 +205,10 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="/index.xqy">CITES Imports into Great Britain</a>
+				<a class="navbar-brand" href="#">
+				    <img class="brandimg" alt="Brand" src="img/citeslogotiny.png"></img>
+				</a>
+				<a class="navbar-brand" href="/index.xqy">Imports into Great Britain</a>
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
@@ -152,26 +226,21 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 			<div class="row">
 				<div class="col-md-12">
 					<h3>Search for a speices, and refine your results below.</h3>
-					<form name="form1" method="get" action="trends.xqy" id="form1">
-						<div class="input-group">
-							<span class="input-group-addon" id="basic-addon1">Search</span>
-								<input type="text" class="form-control" placeholder="Taxon, Genus, Family etc." aria-describedby="basic-addon1" name="q" id="q" value="{$q-text}"></input>
-								<span class="input-group-btn">
-								<button class="btn btn-default" type="submit">Go!</button>
-		 					</span>
-						</div>
-					</form>
 				</div>
 			</div>	
 			<div class="row">
 				<div class="col-md-3">
-					<h3>Refine</h3>
 					{local:refineform()}
 				</div>
 				<div class="col-md-9">
 					<div class="row">
 						<div class="col-md-9">
-							{local:simpletest()}
+							<h3>Trades per Year</h3>
+							<svg class="chart"></svg>
+							<h3>Data</h3>
+							{local:simpletable()}
+							<h3>JSON</h3>
+							<pre>{local:simplejson()}</pre>
 						</div>
 					</div>
 				</div>
@@ -184,8 +253,69 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="../../dist/js/bootstrap.min.js"></script>
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- Lets add some d3 sweetness -->
+    <script src="node_modules/d3/d3.min.js"  charset="utf-8"></script>
+    <script>
+    	var tradedata = {local:simplejson()}
+    	console.log("helloworld")
+    	
+
+    	var data = tradedata.trades;
+    	
+
+
+    	console.log(data)
+
+    	var height = 400,
+    	    barWidth = 40;
+
+    	var vpad = 20;
+
+    	var fquantity = d3.format(",.2f")
+    	var fquantity_scale = function(n) {{
+    		var out = "";
+    		if (Math.min(n,  1000000) == 1000000) {{
+    				out = fquantity(n/1000000) + "M";
+    		}} else if (Math.min(n, 1000) == 1000) {{
+    				out = fquantity(n/1000) + "k";
+    		}} else {{
+    			    out = fquantity(n);
+    		}}
+    		return out;
+    	}};
+
+    	var y = d3.scale.linear()
+    	    .domain([0, d3.max(data, function(d) {{return d.Quantity; }})])
+    	    .range([0, height - (2 * vpad)]);
+
+    	console.log(y)    
+
+    	var chart = d3.select(".chart")
+    	    .attr("width", barWidth * data.length)
+    	    .attr("height", height);
+
+    	var bar = chart.selectAll("g")
+    	    .data(data)
+    	  .enter().append("g")
+    	    .attr("transform", function(d, i) {{ return "translate(" + i * barWidth + ",0)"; }});
+
+    	bar.append("rect")
+    	    .attr("width", barWidth - 1)
+    	    .attr("height", function(d) {{ return y(d.Quantity); }})
+    	    .attr("y", function(d) {{ return height - y(d.Quantity) - vpad; }});
+
+    	bar.append("text")
+    	    .attr("y", function(d) {{ return height - y(d.Quantity) - vpad - 10; }})
+    	    .attr("x", barWidth / 2)
+    	    .text(function(d) {{ return fquantity_scale(d.Quantity); }});
+
+    	bar.append("text")
+    	    .attr("y", height - 10)
+    	    .attr("x", barWidth / 2)
+    	    .text(function(d) {{ return d.Year; }});   
+
+
+    </script>
 </body>
 </html>
