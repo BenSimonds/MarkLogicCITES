@@ -26,6 +26,15 @@ declare function getpurpose($trade) {
 		"Unknown"
 };
 
+declare function getpurpose_code($code) {
+	let $purpose := fn:doc("purposes.xml")/pp:purposes/pp:purpose[@id eq $code]/text()
+	return 
+	if ($purpose) then
+		$purpose
+	else
+		"Unknown"
+};
+
 declare function getcountry($code) {
 	let $country := fn:doc("countries.xml")//row[code eq $code]/country/text()
 	return 

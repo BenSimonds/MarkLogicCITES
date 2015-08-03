@@ -18,20 +18,46 @@ declare variable $agg :=
 	let $agg := xdmp:get-request-field("agg")
 	return $agg;
 
-declare variable $results := cts:contains(fn:collection("Trades"),$q-text);
+declare variable $results := cts:search(fn:collection("Trades"),
+	cts:and-query(
+		(cts:element-value-query(xs:QName("Term"),("live","bodies","skins","specimens")),
+		cts:word-query($q-text))));
 
-declare variable $alltrades := if ($q-text ne '') then $results/tr:trades/tr:trade else fn:collection("Trades")/tr:trades/tr:trade;
+declare variable $xvar := xdmp:get-request-field("xvar","Purpose");
+declare variable $yvar := xdmp:get-request-field("yvar","Trades");
+declare variable $orderby := xdmp:get-request-field("orderby","x");
+
+declare variable $alltrades := if ($q-text ne '') then $results//tr:trade else fn:collection("Trades")/tr:trades/tr:trade;
 declare variable $refinedtrades := local:refineresults($alltrades);
 
 declare function local:simplejson() {
 	let $trades := local:refineresults($alltrades)
-	let $years := fn:distinct-values($trades/tr:Year)
+	let $bars := fn:distinct-values($trades/*[name() eq $xvar])
 	let $a := 
-		for $year in $years	
-		let $q := fn:sum($trades[tr:Year eq $year]/tr:Quantity)
+		for $bar in $bars
+		let $bartrades := $trades/*[name() eq $xvar and text() eq $bar]/..
+		let $q := fn:sum($bartrades/tr:Quantity) 
 		let $q-nice := fn:format-number($q,'#,##0')
-		order by $year
-		return fn:string-join(("{&#34;Year&#34;:&#34;",xs:string($year),"&#34;,&#34;Quantity&#34;:",xs:string($q),"}"))
+		let $n := fn:count($bartrades)
+		let $bartext :=
+			if ($xvar eq "Source") then tools:getsource_code($bar)
+			else if ($xvar eq "Purpose") then tools:getpurpose_code($bar)
+			else $bar
+		let $ob := 
+			if ($orderby eq "x") then $bar
+			else if ($orderby eq "y") then
+				if ($yvar eq "Trades") then -$n
+				else -$q
+			else ()  
+		order by $ob
+		return fn:string-join((
+			"{&#34;XVar&#34;:&#34;",
+			xs:string($bartext),
+			"&#34;,&#34;Quantity&#34;:",
+			xs:string($q),
+			",&#34;Trades&#34;:",
+			xs:string($n),"}"
+		))
 	let $b := 	fn:string-join($a,',')
 	return fn:string-join(("{&#34;trades&#34;:[",$b,"]}"))
 		
@@ -46,17 +72,21 @@ declare function local:simpletable() {
 		for $year in $years	
 		let $q := fn:sum($trades[tr:Year eq $year]/tr:Quantity)
 		let $q-nice := fn:format-number($q,'#,##0')
+		let $n := fn:count($trades[tr:Year eq $year])
+		let $n-nice := fn:format-number($n,'#,##0')
 		order by $year
 		return 
 		<tr>
 			<td style="text-align:center">{$year}</td>
 			<td style="text-align:center">{$q-nice}</td>
+			<td style="text-align:center">{$n-nice}</td>
 		</tr>
 	return 
 		<table class="table" style="width:100%">
 			<tr>
 				<th style="text-align:center">Year</th>
 				<th style="text-align:center">Quantity</th>
+				<th style="text-align:center">Trades</th>
 			</tr>
 			{$a}
 		</table>
@@ -98,12 +128,12 @@ declare function local:results-trades() {
 };
 
 
-declare function local:formfield($name, $field, $options) {
+declare function local:formfield($name, $field, $options, $any) {
 	let $formline := 
 	<div>
 		<label for="startyear" class="control-label">{$name}</label>
 		<select class="form-control"  name= "{$field}" id="{$field}">
-			<option>Any</option>
+			{if ($any) then <option>Any</option> else ()}
 			{for $option in $options
 			order by $option
 			return
@@ -130,8 +160,8 @@ declare function local:refineform() {
 			</div>		
 			<h3>Refine</h3>
 			<div class="form-group">
-				{local:formfield("Start Year", "yearstart", fn:distinct-values($refinedtrades/tr:Year))}
-				{local:formfield("End Year", "yearend",fn:distinct-values($refinedtrades/tr:Year))}
+				{local:formfield("Start Year", "yearstart", fn:distinct-values($refinedtrades/tr:Year),fn:true())}
+				{local:formfield("End Year", "yearend",fn:distinct-values($refinedtrades/tr:Year),fn:true())}
 				<div>
 					<label for="startyear" class="control-label">Exporter</label>
 					<select class="form-control"  name= "exporter" id="exporter">
@@ -158,12 +188,23 @@ declare function local:refineform() {
 				}
 					</select>
 				</div>
-				{local:formfield("Class", "class",fn:distinct-values($refinedtrades/tr:Class))}
-				{local:formfield("Order", "order",fn:distinct-values($refinedtrades/tr:Order))}
-				{local:formfield("Family", "family",fn:distinct-values($refinedtrades/tr:Family))}
-				{local:formfield("Common Name", "common_name",fn:distinct-values($refinedtrades/tr:Common_Name))}
+				{local:formfield("Class", "class",fn:distinct-values($refinedtrades/tr:Class),fn:true())}
+				{local:formfield("Order", "order",fn:distinct-values($refinedtrades/tr:Order),fn:true())}
+				{local:formfield("Family", "family",fn:distinct-values($refinedtrades/tr:Family),fn:true())}
+				{local:formfield("Common Name", "common_name",fn:distinct-values($refinedtrades/tr:Common_Name),fn:true())}
 				<br/>
+				<h3>Plot</h3>
+				{local:formfield("X Variable", "xvar",("Year","Purpose","Source","Common_Name","Family","Order","Class"),fn:false())}
+				{local:formfield("Y Variable", "yvar",("Quantity","Trades"),fn:false())}
 				
+				<label for="order by" class="control-label">Order By</label>
+				<select class="form-control"  name= "orderby" id="orderby">
+				{if (xdmp:get-request-field("orderby") eq "x") 
+					then <div><option value="x" selected="selected">Category</option><option value="y">Value</option></div>
+					else <div><option value="x">Category</option><option value="y" selected="selected">Value</option></div>
+				}
+				</select>
+
 				<input class="btn btn-default" type="submit" value="Refine"></input>
 			</div>
 		</form>
@@ -235,7 +276,8 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 				<div class="col-md-9">
 					<div class="row">
 						<div class="col-md-9">
-							<h3>Trades per Year</h3>
+							<h3>{$yvar} by {$xvar}</h3>
+							Note: Temporarily restricted to live specimens only... see query construction.
 							<svg class="chart"></svg>
 							<h3>Data</h3>
 							{local:simpletable()}
@@ -267,53 +309,71 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 
     	console.log(data)
 
-    	var height = 400,
+    	var height = 500,
     	    barWidth = 40;
-
-    	var vpad = 20;
+        
+        var lpad = 25;
+        var rpad = 25;
+    	var tpad = 25;
+    	var bpad = 100;
 
     	var fquantity = d3.format(",.2f")
-    	var fquantity_scale = function(n) {{
+    	<!--
+    	var fquantity_scale = function(n) {
     		var out = "";
-    		if (Math.min(n,  1000000) == 1000000) {{
+    		if (n >  1000000) {
     				out = fquantity(n/1000000) + "M";
-    		}} else if (Math.min(n, 1000) == 1000) {{
+    		} else if (n >  1000) {
     				out = fquantity(n/1000) + "k";
-    		}} else {{
+    		} else {
     			    out = fquantity(n);
-    		}}
+    		}
     		return out;
-    	}};
+    	};
+    	-->
 
     	var y = d3.scale.linear()
-    	    .domain([0, d3.max(data, function(d) {{return d.Quantity; }})])
-    	    .range([0, height - (2 * vpad)]);
+    	    .domain([0, d3.max(data, function(d) {{return d.{$yvar}; }})])
+    	    .range([0, height - (tpad + bpad)]);
 
     	console.log(y)    
 
     	var chart = d3.select(".chart")
-    	    .attr("width", barWidth * data.length)
+    	    .attr("width", barWidth * data.length + lpad + rpad)
     	    .attr("height", height);
 
     	var bar = chart.selectAll("g")
     	    .data(data)
     	  .enter().append("g")
-    	    .attr("transform", function(d, i) {{ return "translate(" + i * barWidth + ",0)"; }});
+    	    .attr("transform", function(d, i) {{ return "translate(" + (i * barWidth + lpad) + ",0)"; }});
 
     	bar.append("rect")
     	    .attr("width", barWidth - 1)
-    	    .attr("height", function(d) {{ return y(d.Quantity); }})
-    	    .attr("y", function(d) {{ return height - y(d.Quantity) - vpad; }});
+    	    .attr("height", function(d) {{ return y(d.{$yvar}); }})
+    	    .attr("y", function(d) {{ return height - y(d.{$yvar}) - bpad; }});
 
     	bar.append("text")
-    	    .attr("y", function(d) {{ return height - y(d.Quantity) - vpad - 10; }})
+    	    .attr("y", function(d) {{ return height - y(d.{$yvar}) - bpad - 5; }})
     	    .attr("x", barWidth / 2)
-    	    .text(function(d) {{ return fquantity_scale(d.Quantity); }});
+    	    .attr("text-anchor", "middle")
+    	    .text(function(d) {{ return fquantity_scale(d.{$yvar}); }});
 
     	bar.append("text")
-    	    .attr("y", height - 10)
+    	    .attr("y", height - bpad + 10)
     	    .attr("x", barWidth / 2)
-    	    .text(function(d) {{ return d.Year; }});   
+    	    .style("text-anchor", "end")
+    	    .style("fill", "black")
+    	    .attr("transform", function(d, i) {{ return "rotate(-45," + String(0.5 * barWidth) + ", " + String(height - bpad + 10) + ")"; }})
+    	    <!--
+    	    .text(function(d,i) { 
+    	    	if (d.XVar.length > 20){
+					return d.XVar.substring(0,20) + "\r\n...";
+    	    	} else {
+					return d.XVar;
+    	    	}
+    	    	});
+    	  
+    	    -->
 
 
     </script>
