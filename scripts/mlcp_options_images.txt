@@ -1,0 +1,19 @@
+import
+-mode
+local
+-host
+localhost
+-port
+8051
+-username
+admin
+-password
+admin
+-input_file_path
+rawdata/img/*
+-input_file_type
+documents
+-output_collections
+Images
+-output_uri_replace
+"C:/Users/ben.simonds/Documents/MarklogicCITES/rawdata/img,'img', ,'_'"

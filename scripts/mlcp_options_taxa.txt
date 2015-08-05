@@ -1,0 +1,21 @@
+import
+-mode
+local
+-host
+localhost
+-port
+8051
+-username
+admin
+-password
+admin
+-input_file_path
+xmldata/taxa/*
+-document_type
+xml
+-input_file_type
+documents
+-output_collections
+Taxa
+-output_uri_replace
+"C:/Users/ben.simonds/Documents/MarklogicCITES/xmldata/taxa,'taxa', , '_'"

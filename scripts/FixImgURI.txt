@@ -1,0 +1,8 @@
+xquery version "1.0-ml";
+declare namespace html = "http://www.w3.org/1999/xhtml";
+declare namespace info = "http://BIPB.com/CITES/taxa";
+
+for $doc in fn:collection("Taxa")
+let $old := $doc/info:taxon/img_uri
+let $new := <img_uri xmlns="http://BIPB.com/CITES/taxa">{fn:replace($old,' ','_')}</img_uri>
+return xdmp:node-replace($old, $new);

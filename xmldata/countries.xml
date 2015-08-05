@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<countries>
+<countries xmlns="http://BIPB.com/CITES/country">
 <row><code>AD</code><country>Andorra</country></row>
 <row><code>AE</code><country>United Arab Emirates</country></row>
 <row><code>AF</code><country>Afghanistan</country></row>

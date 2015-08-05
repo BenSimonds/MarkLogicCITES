@@ -13,7 +13,7 @@ import csv
 import operator
 
 csvFile = 'rawdata/comptab_2015-06-19 09-39_comma_separated.csv'
-splitlevel = 'Taxon'
+splitlevel = 'Year'
 toplevel = 'trades'
 rowlevel = 'trade'
 
@@ -33,7 +33,7 @@ for row in csvData:
     #We want to split our big csv file up into a number of smaller xml files. family seems like a good dimension to split on, as we will use this for species specific pages?
     #Start a new file each time current family changes.
     if row[familyindex] == '':
-        currentfamily = row[tags.index('Taxon')]
+        currentfamily = row[tags.index(splitlevel)]
     else:   
         currentfamily = row[familyindex].replace(' ', '_').replace('.', '')
     #print("Current Family: " + currentfamily)

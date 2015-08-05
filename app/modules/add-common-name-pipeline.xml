@@ -1,0 +1,68 @@
+<!-- Copyright 2002-2009 Mark Logic Corporation.  All Rights Reserved. -->
+<?xml-stylesheet href="/cpf/pipelines.css" type="text/css"?>
+<pipeline xmlns="http://marklogic.com/cpf/pipelines"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://marklogic.com/cpf/pipelines pipelines.xsd"
+>
+   <pipeline-name>CITES - Common Name Addition</pipeline-name>
+   <pipeline-description>Adds a common name field to cites data.</pipeline-description>
+
+   <success-action>
+      <module>/MarkLogic/cpf/actions/success-action.xqy</module>
+   </success-action>
+   <failure-action>
+      <module>/MarkLogic/cpf/actions/failure-action.xqy</module>
+   </failure-action>
+
+
+   <!-- Status transition copied from status-pipeline.xml -->
+   <status-transition>
+      <annotation>
+      New document entering the system: kick it into the appropriate state.
+      </annotation>
+      <status>created</status>
+      <on-success>http://marklogic.com/states/add-common-name</on-success>
+      <priority>5</priority>
+      <default-action>
+         <module>/MarkLogic/cpf/actions/set-updated-action.xqy</module>
+      </default-action>
+      <execute>
+         <condition>
+            <module>/MarkLogic/cpf/actions/renamed-links-condition.xqy</module>
+         </condition>
+         <action>
+            <module>/MarkLogic/cpf/actions/link-rename-action.xqy</module>
+         </action>
+      </execute>
+      <execute>
+         <condition>
+            <module>/MarkLogic/cpf/actions/existing-state-condition.xqy</module>
+         </condition>
+         <action>
+            <module>/MarkLogic/cpf/actions/touch-state-action.xqy</module>
+         </action>
+      </execute>
+   </status-transition>
+
+
+	<state-transition>
+		<annotation>
+		Add common name, only for XML docs
+		</annotation>
+		<state>http://marklogic.com/states/initial</state>
+		<on-success>http://marklogic.com/states/add-common-name</on-success>
+		<on-failure>http://marklogic.com/states/error</on-failure>
+		<execute>
+         <condition>
+            <module>/MarkLogic/cpf/actions/mimetype-condition.xqy</module>
+            <options xmlns="/MarkLogic/cpf/actions/mimetype-condition.xqy">
+               <mime-type>application/xml</mime-type>
+            </options>
+         </condition>
+         <action>
+			<module>/modules/actions/add-common-name.xqy</module>
+         </action>
+      </execute>
+	</state-transition>
+
+</pipeline>

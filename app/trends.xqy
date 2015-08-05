@@ -12,36 +12,72 @@ import module namespace tools="http://BIPB.com/CITES/tools" at "/tools.xqy";
 (:Aim, use some search criteria to generate table of trends in trades:)
 
 declare variable $q-text := 
-	let $q := xdmp:get-request-field("q")
+	let $q := xdmp:get-request-field("q","Panthera leo")
 	return $q;
 declare variable $agg := 
 	let $agg := xdmp:get-request-field("agg")
 	return $agg;
 
-declare variable $results := cts:search(fn:collection("Trades"),
-	cts:and-query(
-		(cts:element-value-query(xs:QName("Term"),("live","bodies","skins","specimens")),
-		cts:word-query($q-text))));
+
+declare function local:refineresults() {
+	let $wordquery	:= if ($q-text eq "") then () else cts:word-query($q-text)
+	let $cname 		:= if (xdmp:get-request-field("common_name","Any") 	eq "Any") then () else cts:element-value-query(xs:QName("tr:Common_Name"),xdmp:get-request-field("common_name",()))
+	let $class 		:= if (xdmp:get-request-field("class","Any")		eq "Any") then () else cts:element-value-query(xs:QName("tr:Class"),xdmp:get-request-field("class",()))
+	let $order 		:= if (xdmp:get-request-field("order","Any")		eq "Any") then () else cts:element-value-query(xs:QName("tr:Order"),xdmp:get-request-field("order",()))
+	let $family 	:= if (xdmp:get-request-field("family","Any") 		eq "Any") then () else cts:element-value-query(xs:QName("tr:Fammily"),xdmp:get-request-field("family",()))
+	let $exporter 	:= if (xdmp:get-request-field("exporter","Any")		eq "Any") then () else cts:element-value-query(xs:QName("tr:Exporter"),xdmp:get-request-field("exporter",()))
+	let $purpose 	:= if (xdmp:get-request-field("purpose","Any")		eq "Any") then () else cts:element-value-query(xs:QName("tr:Purpose"),xdmp:get-request-field("purpose",()))
+	let $source 	:= if (xdmp:get-request-field("source","Any")		eq "Any") then () else cts:element-value-query(xs:QName("tr:Source"),xdmp:get-request-field("source",()))
+	let $term 		:= if (xdmp:get-request-field("term","Any")			eq "Any") then () else cts:element-value-query(xs:QName("tr:Term"),xdmp:get-request-field("term",()))
+	let $yearstart 	:= if (xdmp:get-request-field("yearstart","Any")	eq "Any") then () else cts:element-range-query(xs:QName("tr:Year"),">=", xs:int(xdmp:get-request-field("yearstart","2000")))
+	let $yearend 		:= if (xdmp:get-request-field("yearend","Any")		eq "Any") then () else cts:element-range-query(xs:QName("tr:Year"),"<=", xs:int(xdmp:get-request-field("yearend","3000")))
+
+	let $unit := cts:element-value-query(xs:QName("tr:Unit"),"")
+
+	let $querylist := 
+		($wordquery,
+		$cname,
+		$class,
+		$order,
+		$family,
+		$exporter,
+		$yearstart,
+		$yearend,
+		$source,
+		$purpose,
+		$term,
+		$unit
+		)
+			
+	let $results := 
+		if (fn:count($querylist) eq 0)
+		then fn:collection("Trades")
+		else cts:search(fn:collection("Trades"),cts:and-query($querylist))
+	let $trades-return := $results/tr:trade
+	return $trades-return
+};
+
+
 
 declare variable $xvar := xdmp:get-request-field("xvar","Purpose");
 declare variable $yvar := xdmp:get-request-field("yvar","Trades");
-declare variable $orderby := xdmp:get-request-field("orderby","x");
+declare variable $orderby := xdmp:get-request-field("orderby","y");
 
-declare variable $alltrades := if ($q-text ne '') then $results//tr:trade else fn:collection("Trades")/tr:trades/tr:trade;
-declare variable $refinedtrades := local:refineresults($alltrades);
+declare variable $refinedtrades := local:refineresults();
 
 declare function local:simplejson() {
-	let $trades := local:refineresults($alltrades)
+	let $trades := local:refineresults()
 	let $bars := fn:distinct-values($trades/*[name() eq $xvar])
 	let $a := 
 		for $bar in $bars
 		let $bartrades := $trades/*[name() eq $xvar and text() eq $bar]/..
-		let $q := fn:sum($bartrades/tr:Quantity) 
+		let $q := fn:sum(tools:getquantity($bartrades)) 
 		let $q-nice := fn:format-number($q,'#,##0')
 		let $n := fn:count($bartrades)
 		let $bartext :=
 			if ($xvar eq "Source") then tools:getsource_code($bar)
 			else if ($xvar eq "Purpose") then tools:getpurpose_code($bar)
+			else if ($xvar eq "Exporter") then tools:getcountry($bar)
 			else $bar
 		let $ob := 
 			if ($orderby eq "x") then $bar
@@ -66,11 +102,11 @@ declare function local:simplejson() {
 
 
 declare function local:simpletable() {
-	let $trades := local:refineresults($alltrades)
+	let $trades := local:refineresults()
 	let $years := fn:distinct-values($trades/tr:Year)
 	let $a := 
 		for $year in $years	
-		let $q := fn:sum($trades[tr:Year eq $year]/tr:Quantity)
+		let $q := fn:sum(tools:getquantity($trades[tr:Year eq $year]))
 		let $q-nice := fn:format-number($q,'#,##0')
 		let $n := fn:count($trades[tr:Year eq $year])
 		let $n-nice := fn:format-number($n,'#,##0')
@@ -92,40 +128,7 @@ declare function local:simpletable() {
 		</table>
 };
 
-declare function local:refineresults($alltrades) {
-	let $cname := xdmp:get-request-field("common_name",())
-	let $class := xdmp:get-request-field("class",())
-	let $order := xdmp:get-request-field("order",())
-	let $family := xdmp:get-request-field("family",())
-	let $exporter := xdmp:get-request-field("exporter",())
-	let $yearstart := xdmp:get-request-field("yearstart",())
-	let $yearend := xdmp:get-request-field("yearend",())
-	let $source := xdmp:get-request-field("source",())
-	let $trades-return := 
-	for $trade in $alltrades
-		let $cn := if ($cname eq "Any")		then xs:boolean(1) else if ($cname) 	then ($trade/tr:Common_Name = $cname) 		else xs:boolean(1)
-		let $c := if ($class eq "Any")		then xs:boolean(1) else if ($class) 	then ($trade/tr:Class = $class) 			else xs:boolean(1)
-		let $o := if ($order eq "Any")		then xs:boolean(1) else if ($order) 	then ($trade/tr:Order = $order) 			else xs:boolean(1) 
-		let $f := if ($family eq "Any") 	then xs:boolean(1) else if ($family) 	then ($trade/tr:Family = $family) 			else xs:boolean(1) 
-		let $e := if ($exporter eq "Any") 	then xs:boolean(1) else if ($exporter)	then ($trade/tr:Exporter = $exporter) 		else xs:boolean(1) 
-		let $y1 := if ($yearstart eq "Any")	then xs:boolean(1) else if ($yearstart)	then ($trade/tr:Year >= xs:int($yearstart)) else xs:boolean(1) 
-		let $y2 := if ($yearend eq "Any") 	then xs:boolean(1) else if ($yearend) 	then ($trade/tr:Year <= xs:int($yearend)) 	else xs:boolean(1)
-		let $s := if ($source eq "Any") 	then xs:boolean(1) else if ($source) 	then ($trade/tr:Source = $source)		 	else xs:boolean(1)
-		where 
-		($cn and $c and $o and $e and $f and $y1 and $y2 and $s)
-		return $trade
-	return $trades-return
-};
 
-declare function local:results-trades() {
-	let $alltrades :=  
-    for $result in $results//search:result
-		  let $uri := $result/@uri
-		  let $doc := fn:doc($uri)
-      let $trades := $doc//tr:trade
-		  return $trades
-	return $alltrades
-};
 
 
 declare function local:formfield($name, $field, $options, $any) {
@@ -188,13 +191,26 @@ declare function local:refineform() {
 				}
 					</select>
 				</div>
+				<div>
+					<label for="purpose" class="control-label">Purpose</label>
+					<select class="form-control"  name= "purpose" id="purpose">
+						<option>Any</option>
+				{for $option in fn:distinct-values($refinedtrades/tr:Purpose)
+					order by $option
+					return
+					if (xdmp:get-request-field("purpose") eq $option) 
+					then <option value="{$option}" selected="selected">{tools:getpurpose_code($option)}</option>
+					else <option value="{$option}">{tools:getpurpose_code($option)}</option>
+				}
+					</select>
+				</div>
 				{local:formfield("Class", "class",fn:distinct-values($refinedtrades/tr:Class),fn:true())}
 				{local:formfield("Order", "order",fn:distinct-values($refinedtrades/tr:Order),fn:true())}
 				{local:formfield("Family", "family",fn:distinct-values($refinedtrades/tr:Family),fn:true())}
 				{local:formfield("Common Name", "common_name",fn:distinct-values($refinedtrades/tr:Common_Name),fn:true())}
 				<br/>
 				<h3>Plot</h3>
-				{local:formfield("X Variable", "xvar",("Year","Purpose","Source","Common_Name","Family","Order","Class"),fn:false())}
+				{local:formfield("X Variable", "xvar",("Year","Purpose","Source","Common_Name","Family","Order","Class","Exporter"),fn:false())}
 				{local:formfield("Y Variable", "yvar",("Quantity","Trades"),fn:false())}
 				
 				<label for="order by" class="control-label">Order By</label>
@@ -253,8 +269,8 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 			</div>
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
-					<li class="active"><a href="/index.xqy">Search</a></li>
-					<li><a href="/trends.xqy">Trends</a></li>
+					<li><a href="/index.xqy">Search</a></li>
+					<li class="active"><a href="/trends.xqy">Trends</a></li>
 					<li><a href="https://github.com/BenSimonds/MarkLogicDemoApp">Docs</a></li>
 				</ul>
 			</div><!--/.nav-collapse -->
@@ -277,12 +293,14 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
 					<div class="row">
 						<div class="col-md-9">
 							<h3>{$yvar} by {$xvar}</h3>
-							Note: Temporarily restricted to live specimens only... see query construction.
+							Note: You must limit your search in some way, too much data otherwise for now... 
 							<svg class="chart"></svg>
 							<h3>Data</h3>
 							{local:simpletable()}
 							<h3>JSON</h3>
 							<pre>{local:simplejson()}</pre>
+							<h3>Raw</h3>
+							<pre>{local:refineresults()}</pre>
 						</div>
 					</div>
 				</div>
@@ -312,7 +330,7 @@ xdmp:set-response-content-type("text/html; charset=utf-8"),
     	var height = 500,
     	    barWidth = 40;
         
-        var lpad = 25;
+        var lpad = 50;
         var rpad = 25;
     	var tpad = 25;
     	var bpad = 100;

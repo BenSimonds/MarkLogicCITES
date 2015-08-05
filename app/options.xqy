@@ -5,6 +5,7 @@ import module namespace search = "http://marklogic.com/appservices/search" at "/
 
 declare variable $options := 
   <options xmlns="http://marklogic.com/appservices/search">
+  <page-length>50</page-length>
   <!--
   <constraint name="year">
   	<range type="xs:int">
@@ -14,11 +15,11 @@ declare variable $options :=
   	</range>
   </constraint>
   -->
-  <constraint name="common_name">
+  (:<constraint name="common_name">
   	<value type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
   		<element ns="http://BIPB.com/CITES" name="Common_Name"/>
   	</value>
-  </constraint>
+  </constraint>:)
   <constraint name="class">
   	<range type="xs:string" collation="http://marklogic.com/collation//S1/T00BB/AS">
   		<element ns="http://BIPB.com/CITES" name="Class"/>

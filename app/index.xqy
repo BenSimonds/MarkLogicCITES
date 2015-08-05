@@ -9,30 +9,104 @@ import module namespace op="http://BIPB.com/CITES/options" at "/options.xqy";
 import module namespace tools="http://BIPB.com/CITES/tools" at "/tools.xqy";
 
 declare variable $q-text := 
-	let $q := xdmp:get-request-field("q", "sort:alphabetical")
+	let $q := xdmp:get-request-field("q", "")
 	return $q;
 declare variable $agg := 
 	let $agg := xdmp:get-request-field("agg")
 	return $agg;
 
-declare variable $results := search:search($q-text,$op:options, xs:unsignedLong(xdmp:get-request-field("start","1")));
+(:declare variable $results := search:search($q-text,$op:options, xs:unsignedLong(xdmp:get-request-field("start","1")));:)
 
-declare function local:pagination($resultspage) {
-	let $start := xs:unsignedLong($resultspage/@start)
-	let $length := xs:unsignedLong($resultspage/@page-length)
-	let $total := xs:unsignedLong($resultspage/@total)
+
+declare variable $results :=
+	let $options_s := 
+		if ($q-text eq "")
+		then (cts:index-order(cts:element-reference(xs:QName("tr:Taxon"),("type=string","collation=http://marklogic.com/collation//S1/AS/T00BB")),"ascending"))
+		else (cts:score-order())
+	let $options_f := 
+		if ($q-text eq "")
+		then  ("ascending","collation=http://marklogic.com/collation//S1/AS/T00BB")  
+		else ("frequency-order","collation=http://marklogic.com/collation//S1/AS/T00BB")  
+	
+	
+	let $query := 
+		let $facet-queries := 
+			for $f in fc:facets-all()
+			return cts:element-value-query(xs:QName($f/@qname),$f/text(),())
+		(:Here we build up an and queryt from a list of sub-querys.:)
+		let $wordquery := if ($q-text) then cts:word-query($q-text) else ()
+		let $unit := cts:element-value-query(xs:QName("tr:Unit"),"")
+		return cts:and-query(($wordquery,$facet-queries,$unit))
+	
+	
+	let $facets :=
+		for $facet in ("Class","Order","Family")
+    		let $qname := xs:QName(fn:string-join(("tr:",$facet)))
+			let $values :=
+				for $v in cts:element-values($qname, "", $options_f, $query)
+				return <search:facet-value name="{$v}" count="{cts:frequency($v)}"> {$v} </search:facet-value>
+			return
+				<search:facet name="{$facet}">
+					{$values}
+				</search:facet>
+  	(:Pagination:)
+  	let $start := if (xdmp:get-request-field("start","1") = "") then 1 else xs:unsignedLong(xdmp:get-request-field("start","1"))
+  	let $pagelength := 5
+  	let $end := $start + $pagelength - 1
+  	let $taxa := cts:element-values(xs:QName("tr:Taxon"),"",$options_f,$query)
+  	let $taxa-page := $taxa[$start to $end]
+  	let $taxa-query := cts:and-query(($query, cts:element-value-query(xs:QName("tr:Taxon"),$taxa-page)))
+  	(:let $estimate := xdmp:estimate(cts:search(fn:collection("Trades"),$query,$options_s)) (:Count of trades.:):)
+  	let $estimate := fn:count($taxa) (:Count of trades.:)
+
+  	let $search-results :=
+	    for $r in cts:search(fn:collection("Trades"),$taxa-query,$options_s)
+	    	return <search:result uri="{$r/base-uri()}">{$r}</search:result>
+	return 
+	    <search:results start="{$start}" page-length="{$pagelength}" total="{$estimate}">
+	    	<search:qtext>{$q-text}</search:qtext>
+		    {$facets}
+		    {$search-results}
+	    </search:results>;
+
+
+declare function local:pagination($results) {
+	let $start := xs:unsignedLong($results/@start)
+	let $length := xs:unsignedLong($results/@page-length)
+	let $total := xs:unsignedLong($results/@total)
 	let $last := xs:unsignedLong($start + $length - 1)
 	let $end := if ($total > $last) then $last else $total
-	let $qtext := $resultspage/search:qtext[1]/text()
+	let $qtext := $results/search:qtext[1]/text()
 	let $next := if ($total > $last) then $last + 1 else ()
 	let $previous := if (($start > 1) and ($start - $length > 0)) then fn:max((($start - $length),1)) else ()
+	let $facet-strings :=
+	  for $f in fc:facets-all()
+	  return fn:string-join(('&amp;',$f/@name,'=',$f/text()))
 	let $next-href := 
 		if ($next)
-		then fn:concat("/index.xqy?q=",if ($qtext) then ($qtext) else (),"&amp;start=",$next,"&amp;submitbtn=page","&amp;agg=", $agg)
+		then fn:string-join((
+			xs:string("/index.xqy?q="),
+			xs:string(if ($qtext) then ($qtext) else ""),
+			"&amp;start=",
+			xs:string($next),
+			"&amp;submitbtn=page",
+			"&amp;agg=", 
+			xs:string($agg),
+			$facet-strings
+			))
 		else ()
 	let $previous-href := 
 		if ($previous)
-		then fn:concat("/index.xqy?q=",if ($qtext) then ($qtext) else (),"&amp;start=",$previous,"&amp;submitbtn=page","&amp;agg=", $agg)
+		then fn:string-join((
+			xs:string("/index.xqy?q="),
+			xs:string(if ($qtext) then ($qtext) else ""),
+			"&amp;start=",
+			xs:string($previous),
+			"&amp;submitbtn=page",
+			"&amp;agg=",
+			xs:string($agg),
+			$facet-strings
+			))
 		else ()
 	let $total-pages := fn:ceiling($total div $length)
 	let $currpage := fn:ceiling($start div $length)
@@ -53,7 +127,14 @@ declare function local:pagination($resultspage) {
     			then <li><a href="{$previous-href}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li> else ()}
     			{for $i in ($rangestart to $rangeend)
     				let $page-start := (($length * $i) + 1) - $length
-    				let $page-href := concat("/index.xqy?q=",if ($qtext) then ($qtext) else (),"&amp;start=",$page-start,"&amp;submitbtn=page")
+    				let $page-href := fn:string-join((
+    					"/index.xqy?q=",
+    					xs:string(if ($qtext) then ($qtext) else ()),
+    					"&amp;start=",
+    					xs:string($page-start),
+    					"&amp;submitbtn=page",
+    					$facet-strings
+    					))
     				return 
     					if ($i eq $currpage)
     					then <li class="active"><span >{$i}</span></li>
@@ -70,10 +151,9 @@ declare function local:pagination($resultspage) {
 
 
 
-declare function local:tradeaggr($doc) {
-	let $taxon := fn:distinct-values($doc//tr:Taxon)
-	let $trades := $doc//tr:trade[tr:Taxon eq $taxon]
-	let $years := fn:distinct-values($trades/tr:Year)
+declare function local:tradeaggr($trades) {
+	let $taxon := fn:distinct-values($trades//tr:Taxon)
+	let $years := fn:distinct-values($trades//tr:Year)
 	let $terms := fn:distinct-values(
 		for $term in $trades//tr:Term
 		order by fn:sum($trades[tr:Term eq $term]/tr:Quantity) descending
@@ -94,13 +174,13 @@ declare function local:tradeaggr($doc) {
 			let $quantity_other := fn:sum($trades_other/tr:Quantity)
 			let $quantities := 
 				for $term in $terms_restricted
-					let $quantity := fn:sum($trades[tr:Year eq $year and tr:Term eq $term]/tr:Quantity)
+					let $quantity := fn:sum(tools:getquantity($trades[tr:Year eq $year and tr:Term eq $term]))
 					return <td style="text-align:center">{$quantity}</td> 
 			order by -$year
 			return
 				  <tr>
 				  <td style="text-align:center">{$year}</td>
-				  <td style="text-align:center">{fn:sum($trades[tr:Year eq $year]/tr:Quantity)}</td>
+				  <td style="text-align:center">{fn:sum(tools:getquantity($trades[tr:Year eq $year]))}</td>
 				  {$quantities}
 				  {if ($show_other)
 				  	then <td style="text-align:center">{$quantity_other}</td>
@@ -110,7 +190,7 @@ declare function local:tradeaggr($doc) {
 				    
 
 	return <div>
-		{tools:getinfohtml($doc)}
+		{tools:getinfohtml($trades)}
 		<b>Imports into the UK:</b>
 		<table style="width:100%" class= "table">
 			<tr>
@@ -131,22 +211,20 @@ declare function local:tradeaggr($doc) {
 
 
 
-declare function local:tradedetails($doc) {
-	let $taxa := fn:distinct-values($doc//tr:Taxon)
-	let $class := fn:distinct-values($doc//tr:Class)
-	let $order := fn:distinct-values($doc//tr:Order)
-	let $family := fn:distinct-values($doc//tr:Family)
+declare function local:tradedetails($trades) {
+	let $taxon := fn:distinct-values($trades//tr:Taxon)
+	let $class := fn:distinct-values($trades//tr:Class)
+	let $order := fn:distinct-values($trades//tr:Order)
+	let $family := fn:distinct-values($trades//tr:Family)
 	(:Loop through taxa:)
 	let $taxa-trades :=
-		for $taxon in $taxa
-		let $trades := $doc//tr:trade[tr:Taxon eq $taxon]
 		let $details := 
 			for $trade in $trades
 			let $year := $trade/tr:Year
 			let $from := $trade/tr:Exporter
 			let $purpose := tools:getpurpose($trade)
 			let $source := tools:getsource($trade)
-			let $quantity := $trade/tr:Quantity
+			let $quantity := tools:getquantity($trade)
 			order by -$year
 			return
 				  <tr>
@@ -157,7 +235,7 @@ declare function local:tradedetails($doc) {
 				    <td>{$purpose}</td>
 				  </tr>
 		return <div>
-			{tools:getinfohtml($doc)}
+			{tools:getinfohtml($trades)}
 			<b>Imports into the UK:</b>
 			<table style="width:100%" class= "table">
 				<tr>
@@ -175,15 +253,21 @@ declare function local:tradedetails($doc) {
 };
 
 declare function local:search-results() {
-	let $items :=
+	let $docs :=
 		for $result in $results//search:result
-			let $uri := fn:data($result/@uri)
-			let $doc := fn:doc($uri)
-			return 
+		let $uri := fn:data($result/@uri)
+		let $doc := fn:doc($uri)
+		return $doc
+	let $taxa := fn:distinct-values($docs//tr:Taxon)
+	let $items :=
+		for $taxon in $taxa
+		 	let $trades := $docs//tr:trade[tr:Taxon eq $taxon]
+			return
 			if ($agg eq "on") then
-				local:tradeaggr($doc)
+				<div>{local:tradeaggr($trades)}</div>
+				
 			else
-				local:tradedetails($doc)
+				<div>{local:tradedetails($trades)}</div>
 	return 
 		if ($items)
 		then 
